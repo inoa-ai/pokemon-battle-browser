@@ -3,15 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { gameAudio } from './audio/gameAudio';
 import { BattleScreen } from './components/BattleScreen';
 import { CreatureCard } from './components/CreatureCard';
-import { creatures, defaultFoeTeam, defaultPlayerTeam } from './data/creatures';
-import { createBattle, randomTeams } from './game/battle';
+import { creatures, defaultPlayerTeam } from './data/creatures';
+import { createBattle, randomFoeTeam, randomTeams } from './game/battle';
 import type { BattleFxEvent, BattleState } from './game/types';
 
 const MAX_TEAM_SIZE = 3;
 
 export default function App() {
   const [selected, setSelected] = useState<string[]>(defaultPlayerTeam);
-  const [foeTeam, setFoeTeam] = useState<string[]>(defaultFoeTeam);
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [fxQueue, setFxQueue] = useState<BattleFxEvent[]>([]);
   const [queuedFinalBattle, setQueuedFinalBattle] = useState<BattleState | null>(null);
@@ -54,10 +53,10 @@ export default function App() {
     });
   };
 
-  const startBattle = (playerTeam = selected, opponentTeam = foeTeam) => {
+  const startBattle = (playerTeam = selected, opponentTeam?: string[]) => {
     if (playerTeam.length !== MAX_TEAM_SIZE) return;
     activateAudio('confirm');
-    const next = createBattle(playerTeam, opponentTeam);
+    const next = createBattle(playerTeam, opponentTeam ?? randomFoeTeam());
     playBattleTimeline(next);
     setView('battle');
   };
@@ -85,12 +84,11 @@ export default function App() {
   const randomize = () => {
     const teams = randomTeams();
     setSelected(teams.player);
-    setFoeTeam(teams.foe);
     startBattle(teams.player, teams.foe);
   };
 
   const reset = () => {
-    startBattle(selected, foeTeam);
+    startBattle(selected);
   };
 
   const toggleSound = () => {

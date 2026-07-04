@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createBattle, performTurn } from './battle';
+import { createBattle, performTurn, randomFoeTeam } from './battle';
 
 describe('battle engine', () => {
   const withFixedRandom = <T>(value: number, run: () => T): T => {
@@ -28,6 +28,15 @@ describe('battle engine', () => {
     const battle = createBattle(['pikachu', 'venusaur', 'snorlax'], ['eevee', 'gengar', 'mewtwo']);
     const next = performTurn(battle, { kind: 'switch', targetIndex: 1 });
     expect(next.playerActive).toBe(1);
+  });
+
+  it('creates a random foe team from the full roster', () => {
+    const foeTeam = randomFoeTeam();
+    const rosterIds = new Set(['pikachu', 'charizard', 'blastoise', 'venusaur', 'gengar', 'lucario', 'eevee', 'snorlax', 'dragonite', 'mewtwo']);
+
+    expect(foeTeam).toHaveLength(3);
+    expect(new Set(foeTeam).size).toBe(3);
+    expect(foeTeam.every((id) => rosterIds.has(id))).toBe(true);
   });
 
   it('prevents damage when the target is immune', () => {

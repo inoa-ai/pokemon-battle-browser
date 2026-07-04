@@ -451,6 +451,14 @@ function statusName(status: string): string {
 }
 
 export function randomTeams(): { player: string[]; foe: string[] } {
-  const shuffled = [...creatures].sort(() => Math.random() - 0.5).map((creature) => creature.id);
-  return { player: shuffled.slice(0, 3), foe: shuffled.slice(3, 6) };
+  const shuffled = shuffle(creatures.map((creature) => creature.id));
+  return { player: shuffled.slice(0, 3), foe: randomFoeTeam() };
+}
+
+export function randomFoeTeam(): string[] {
+  return shuffle(creatures.map((creature) => creature.id)).slice(0, 3);
+}
+
+function shuffle<T>(items: T[]): T[] {
+  return [...items].sort(() => Math.random() - 0.5);
 }
