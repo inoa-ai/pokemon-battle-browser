@@ -11,6 +11,7 @@
 - プレイヤー vs CPU のターン制バトル
 - タイプ相性、物理/特殊/補助技、PP、HP、状態異常、能力変化、交代
 - 技タイプに応じたアクションエフェクト、ヒット演出、HPバーアニメーション
+- Web Audio APIによるオリジナルBGMと効果音
 - PC/スマホ対応のレスポンシブUI
 
 ## Commands
@@ -35,6 +36,8 @@ https://inoa-ai.github.io/pokemon-battle-browser/
 ```
 
 ランキングや外部DBはありません。ゲーム本体だけをGitHub Pagesで静的公開します。
+
+ブラウザの自動再生制限により、BGM/効果音は最初のクリックまたは右上の音量ボタン操作後に鳴ります。
 
 ## Project Structure
 

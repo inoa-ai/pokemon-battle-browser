@@ -1,5 +1,6 @@
-import { RotateCcw, Shuffle, Swords } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { RotateCcw, Shuffle, Swords, Volume2, VolumeX } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { gameAudio } from './audio/gameAudio';
 import { BattleScreen } from './components/BattleScreen';
 import { CreatureCard } from './components/CreatureCard';
 import { creatures, defaultFoeTeam, defaultPlayerTeam } from './data/creatures';
@@ -15,12 +16,35 @@ export default function App() {
   const [fxQueue, setFxQueue] = useState<BattleFxEvent[]>([]);
   const [queuedFinalBattle, setQueuedFinalBattle] = useState<BattleState | null>(null);
   const [view, setView] = useState<'battle' | 'roster'>('roster');
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.localStorage.getItem('pokemon-battle-sound') !== 'off';
+  });
 
   const canStart = selected.length === MAX_TEAM_SIZE;
   const currentFx = fxQueue[0];
   const selectedSet = useMemo(() => new Set(selected), [selected]);
 
+  useEffect(() => {
+    gameAudio.setEnabled(soundEnabled);
+    window.localStorage.setItem('pokemon-battle-sound', soundEnabled ? 'on' : 'off');
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    gameAudio.setScene(view === 'battle' && battle ? 'battle' : 'roster');
+  }, [battle, view]);
+
+  useEffect(() => {
+    if (currentFx) gameAudio.playEvent(currentFx);
+  }, [currentFx]);
+
+  const activateAudio = useCallback((sound: 'tap' | 'confirm' | 'back' = 'tap') => {
+    if (!soundEnabled) return;
+    void gameAudio.unlock().then(() => gameAudio.playUi(sound));
+  }, [soundEnabled]);
+
   const toggleCreature = (id: string) => {
+    activateAudio('tap');
     setBattle(null);
     setView('roster');
     setSelected((current) => {
@@ -32,6 +56,7 @@ export default function App() {
 
   const startBattle = (playerTeam = selected, opponentTeam = foeTeam) => {
     if (playerTeam.length !== MAX_TEAM_SIZE) return;
+    activateAudio('confirm');
     const next = createBattle(playerTeam, opponentTeam);
     playBattleTimeline(next);
     setView('battle');
@@ -68,14 +93,32 @@ export default function App() {
     startBattle(selected, foeTeam);
   };
 
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    gameAudio.setEnabled(next);
+    if (next) {
+      void gameAudio.unlock().then(() => gameAudio.playUi('confirm'));
+    }
+  };
+
   return (
     <main className="app-shell">
       <header className="topbar">
-        <button className="brand-button" onClick={() => setView(view === 'battle' ? 'roster' : 'battle')}>
+        <button
+          className="brand-button"
+          onClick={() => {
+            activateAudio('tap');
+            setView(view === 'battle' ? 'roster' : 'battle');
+          }}
+        >
           <Swords size={18} />
           <span>アークライト・クラッシュ</span>
         </button>
         <div className="topbar-actions">
+          <button className="icon-button" onClick={toggleSound} title={soundEnabled ? '音をオフにする' : '音をオンにする'} aria-label={soundEnabled ? '音をオフにする' : '音をオンにする'}>
+            {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </button>
           <button className="icon-button" onClick={randomize} title="チームをランダムにする">
             <Shuffle size={18} />
           </button>
@@ -138,7 +181,11 @@ export default function App() {
           busy={fxQueue.length > 0}
           onBattleChange={playBattleTimeline}
           onFxDone={advanceFx}
-          onOpenRoster={() => setView('roster')}
+          onUserAction={() => activateAudio('tap')}
+          onOpenRoster={() => {
+            activateAudio('back');
+            setView('roster');
+          }}
           onRestart={reset}
         />
       )}

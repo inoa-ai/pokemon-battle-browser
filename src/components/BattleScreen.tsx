@@ -12,11 +12,12 @@ interface BattleScreenProps {
   busy: boolean;
   onBattleChange: (battle: BattleState) => void;
   onFxDone: () => void;
+  onUserAction: () => void;
   onOpenRoster: () => void;
   onRestart: () => void;
 }
 
-export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone, onOpenRoster, onRestart }: BattleScreenProps) {
+export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone, onUserAction, onOpenRoster, onRestart }: BattleScreenProps) {
   const player = getActive(battle, 'player');
   const foe = getActive(battle, 'foe');
   const playerCreature = getActiveCreature(battle, 'player');
@@ -43,6 +44,7 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
 
   const choose = (choice: BattleChoice) => {
     if (busy || battle.phase === 'finished') return;
+    onUserAction();
     onBattleChange(performTurn(battle, choice));
   };
 
