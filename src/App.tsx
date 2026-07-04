@@ -11,10 +11,10 @@ const MAX_TEAM_SIZE = 3;
 export default function App() {
   const [selected, setSelected] = useState<string[]>(defaultPlayerTeam);
   const [foeTeam, setFoeTeam] = useState<string[]>(defaultFoeTeam);
-  const [battle, setBattle] = useState<BattleState | null>(() => createBattle(defaultPlayerTeam, defaultFoeTeam));
+  const [battle, setBattle] = useState<BattleState | null>(null);
   const [fxQueue, setFxQueue] = useState<BattleFxEvent[]>([]);
   const [queuedFinalBattle, setQueuedFinalBattle] = useState<BattleState | null>(null);
-  const [view, setView] = useState<'battle' | 'roster'>('battle');
+  const [view, setView] = useState<'battle' | 'roster'>('roster');
 
   const canStart = selected.length === MAX_TEAM_SIZE;
   const currentFx = fxQueue[0];
