@@ -178,6 +178,7 @@ Completed first playable battle build:
 - Team loadouts now support selecting four moves per Pokemon from a candidate move pool.
 - Boss mode added as a strengthened solo Mewtwo battle and a 3v3 Mewtwo/Sylveon/Machamp boss team battle.
 - Boss team battles block the exact same three-creature composition on the player side.
+- Buff/debuff handling now uses Pokemon-style stat stages from -6 to +6, switch-out reset, critical-hit stat-stage handling, move-specific secondary stat chances, and visible stat-stage chips in the HP cards.
 - Rich CSS/SVG-style action effects added: move flash, hit shake, type-colored bursts, particles, HP transitions, faint animation, status orbit, responsive layout.
 - Tests added in `src/game/battle.test.ts`.
 - Verification passed:

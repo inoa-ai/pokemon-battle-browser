@@ -39,7 +39,20 @@ export interface Move {
   maxPp: number;
   priority?: number;
   effect:
-    | { kind: 'damage'; drain?: number; burnChance?: number; paralyzeChance?: number; statDrop?: Partial<Record<keyof Stats, number>>; recoil?: number }
+    | {
+        kind: 'damage';
+        drain?: number;
+        burnChance?: number;
+        paralyzeChance?: number;
+        statDrop?: Partial<Record<keyof Stats, number>>;
+        statDropChance?: number;
+        statChange?: {
+          boosts: Partial<Record<keyof Stats, number>>;
+          target?: 'self' | 'opponent';
+          chance?: number;
+        };
+        recoil?: number;
+      }
     | { kind: 'boost'; boosts: Partial<Record<keyof Stats, number>>; target?: 'self' | 'opponent'; selfDamagePercent?: number }
     | { kind: 'heal'; percent: number }
     | { kind: 'status'; status: StatusName; chance: number; duration?: number }

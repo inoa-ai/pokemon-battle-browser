@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { RosterPortrait } from './CreatureCard';
 import { getCreature, typeColors, typeLabels } from '../data/creatures';
 import { availableSwitches, getActive, getActiveCreature, getActiveMoves, performTurn, validMoves } from '../game/battle';
-import type { ActiveCreature, BattleChoice, BattleFxEvent, BattleSide, BattleState, Creature, Move, StatusName } from '../game/types';
+import type { ActiveCreature, BattleChoice, BattleFxEvent, BattleSide, BattleState, Creature, Move, Stats, StatusName } from '../game/types';
 
 interface BattleScreenProps {
   battle: BattleState;
@@ -194,6 +194,7 @@ function HpCard({ side, active, creature, hpPercent }: { side: BattleSide; activ
         <span>{active.hp}/{active.maxHp}</span>
         <StatusText statuses={active.statuses.map((status) => status.name)} />
       </div>
+      <StatBoosts boosts={active.boosts} />
     </div>
   );
 }
@@ -271,6 +272,21 @@ function StatusText({ statuses }: { statuses: StatusName[] }) {
   return <span>{statuses.map(statusLabel).join(' / ')}</span>;
 }
 
+function StatBoosts({ boosts }: { boosts: ActiveCreature['boosts'] }) {
+  const entries = (Object.entries(boosts) as Array<[keyof Stats, number]>).filter(([stat, value]) => stat !== 'hp' && value !== 0);
+  if (!entries.length) return null;
+  return (
+    <div className="boost-row" aria-label="能力ランク">
+      {entries.map(([stat, value]) => (
+        <span key={stat} className={`boost-chip ${value > 0 ? 'boost-chip--up' : 'boost-chip--down'}`}>
+          {statBoostLabel(stat)}
+          {value > 0 ? `+${value}` : value}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function moveCategoryLabel(category: Move['category']): string {
   const labels: Record<Move['category'], string> = {
     physical: '物理',
@@ -278,6 +294,18 @@ function moveCategoryLabel(category: Move['category']): string {
     status: '補助',
   };
   return labels[category];
+}
+
+function statBoostLabel(stat: keyof Stats): string {
+  const labels: Record<keyof Stats, string> = {
+    hp: 'HP',
+    atk: '攻',
+    def: '防',
+    spa: '特攻',
+    spd: '特防',
+    spe: '速',
+  };
+  return labels[stat];
 }
 
 function statusLabel(status: StatusName): string {

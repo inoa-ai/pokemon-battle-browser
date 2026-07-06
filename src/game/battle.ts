@@ -8,6 +8,22 @@ let nextFxId = 1;
 const statKeys: Array<keyof Stats> = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const BATTLE_LEVEL = 50;
 const CASUAL_DAMAGE_SCALE = 0.55;
+const MIN_BOOST_STAGE = -6;
+const MAX_BOOST_STAGE = 6;
+const statLabels: Record<keyof Stats, string> = {
+  hp: 'HP',
+  atk: '攻撃',
+  def: '防御',
+  spa: '特攻',
+  spd: '特防',
+  spe: '素早さ',
+};
+
+interface BoostApplicationOptions {
+  source?: BattleSide;
+  move?: Move;
+  silentIfNoChange?: boolean;
+}
 
 export function createActiveCreature(creature: Creature, side: BattleSide, slot: number, moveIds?: string[], options: { hpMultiplier?: number; isBoss?: boolean } = {}): ActiveCreature {
   const selectedMoveIds = normalizeMoveIds(creature, moveIds);
@@ -145,12 +161,24 @@ function chooseFoeAction(state: BattleState): BattleChoice {
   if (moves.length === 0) return { kind: 'move', moveId: getActiveMoves(state, 'foe')[0].id };
 
   const player = getActiveCreature(state, 'player');
-  const best = [...moves].sort((a, b) => scoreMove(b, player) - scoreMove(a, player))[0];
+  const best = [...moves].sort((a, b) => scoreMove(state, 'foe', b, player) - scoreMove(state, 'foe', a, player))[0];
   return { kind: 'move', moveId: best.id };
 }
 
-function scoreMove(move: Move, target: Creature): number {
-  if (move.category === 'status') return move.effect.kind === 'heal' ? 35 : 28;
+function scoreMove(state: BattleState, side: BattleSide, move: Move, target: Creature): number {
+  if (move.effect.kind === 'boost') {
+    const targetSide = move.effect.target === 'opponent' ? other(side) : side;
+    const targetActive = getActive(state, targetSide);
+    const usefulStages = Object.entries(move.effect.boosts).reduce((total, [stat, delta]) => {
+      if (stat === 'hp') return total;
+      const key = stat as keyof Stats;
+      const before = targetActive.boosts[key] ?? 0;
+      const after = clamp(before + delta, MIN_BOOST_STAGE, MAX_BOOST_STAGE);
+      return total + Math.abs(after - before);
+    }, 0);
+    return usefulStages > 0 ? 34 + usefulStages * 16 - state.turn * 1.5 : 8;
+  }
+  if (move.category === 'status') return move.effect.kind === 'heal' ? 35 : 26;
   return move.power * effectiveness(move.type, target.types) + (move.priority ?? 0) * 12 + move.accuracy * 0.1;
 }
 
@@ -208,8 +236,7 @@ function resolveChoice(state: BattleState, side: BattleSide, choice: BattleChoic
     case 'boost':
       {
         const boostTarget = move.effect.target === 'opponent' ? targetSide : side;
-        applyBoosts(state, boostTarget, move.effect.boosts, `${getActiveCreature(state, boostTarget).name}の能力が変化した！`);
-        pushFx(state, { kind: 'boost', source: side, target: boostTarget, moveName: move.name, moveType: move.type, text: '強化' });
+        applyBoosts(state, boostTarget, move.effect.boosts, { source: side, move });
       }
       break;
     case 'heal':
@@ -228,7 +255,8 @@ function resolveChoice(state: BattleState, side: BattleSide, choice: BattleChoic
       statKeys.forEach((key) => {
         if ((source.boosts[key] ?? 0) < 0) source.boosts[key] = 0;
       });
-      applyBoosts(state, side, { spd: 1 }, `${creature.name}は清めの霧に包まれた。`);
+      pushLog(state, `${creature.name}は清めの霧に包まれた。`, side === 'player' ? 'good' : 'bad');
+      applyBoosts(state, side, { spd: 1 }, { source: side, move });
       pushFx(state, { kind: 'status', source: side, target: side, moveName: move.name, moveType: move.type, text: '浄化' });
       break;
   }
@@ -239,6 +267,7 @@ function resolveSwitch(state: BattleState, side: BattleSide, targetIndex: number
   const activeIndex = side === 'player' ? state.playerActive : state.foeActive;
   if (targetIndex === activeIndex || !team[targetIndex] || isFainted(team[targetIndex])) return;
 
+  resetBoosts(team[activeIndex]);
   if (side === 'player') state.playerActive = targetIndex;
   else state.foeActive = targetIndex;
   const creature = getCreature(team[targetIndex].creatureId);
@@ -256,8 +285,8 @@ function resolveDamageMove(state: BattleState, side: BattleSide, move: Move, tar
   const critical = Math.random() < 0.08;
   const attackingStat = move.category === 'physical' ? 'atk' : 'spa';
   const defendingStat = move.category === 'physical' ? 'def' : 'spd';
-  const attack = modifiedStat(state, side, attackingStat);
-  const defense = Math.max(1, modifiedStat(state, targetSide, defendingStat));
+  const attack = modifiedStat(state, side, attackingStat, { critical, role: 'attack' });
+  const defense = Math.max(1, modifiedStat(state, targetSide, defendingStat, { critical, role: 'defense' }));
   const sameType = sourceCreature.types.includes(move.type) ? (sourceCreature.id === 'eevee' ? 2 : 1.5) : 1;
   const critBoost = critical ? 1.45 : 1;
   const variance = 0.92 + Math.random() * 0.16;
@@ -303,7 +332,13 @@ function resolveDamageMove(state: BattleState, side: BattleSide, move: Move, tar
     if (move.effect.drain) heal(state, side, Math.max(1, Math.round(damage * move.effect.drain)), `${sourceCreature.name}は生命力を吸収した。`);
     if (move.effect.burnChance && Math.random() * 100 < move.effect.burnChance) applyStatus(state, targetSide, 'burn', 4);
     if (move.effect.paralyzeChance && Math.random() * 100 < move.effect.paralyzeChance) applyStatus(state, targetSide, 'paralyze', 4);
-    if (move.effect.statDrop && Math.random() < 0.4) applyBoosts(state, targetSide, move.effect.statDrop, `${targetCreature.name}の流れが乱れた。`);
+    if (!isFainted(target) && move.effect.statDrop && Math.random() * 100 < (move.effect.statDropChance ?? 30)) {
+      applyBoosts(state, targetSide, move.effect.statDrop, { source: side, move, silentIfNoChange: true });
+    }
+    if (!isFainted(target) && move.effect.statChange && Math.random() * 100 < (move.effect.statChange.chance ?? 100)) {
+      const changeTarget = move.effect.statChange.target === 'self' ? side : targetSide;
+      applyBoosts(state, changeTarget, move.effect.statChange.boosts, { source: side, move, silentIfNoChange: true });
+    }
   }
 
   if (targetCreature.id === 'pikachu' && move.category === 'physical' && damage > 0 && !isFainted(target) && Math.random() < 0.25) {
@@ -340,14 +375,43 @@ function applyStatus(state: BattleState, side: BattleSide, status: StatusName, d
   pushFx(state, { kind: 'status', target: side, status, text: statusName(status) });
 }
 
-function applyBoosts(state: BattleState, side: BattleSide, boosts: Partial<Record<keyof Stats, number>>, message: string): void {
+function applyBoosts(state: BattleState, side: BattleSide, boosts: Partial<Record<keyof Stats, number>>, options: BoostApplicationOptions = {}): void {
   const active = getActive(state, side);
+  const creature = getActiveCreature(state, side);
+  const changes: Array<{ stat: keyof Stats; before: number; after: number; delta: number }> = [];
+  let capped = false;
+
   for (const [key, delta] of Object.entries(boosts) as Array<[keyof Stats, number]>) {
     if (key === 'hp') continue;
-    active.boosts[key] = clamp((active.boosts[key] ?? 0) + delta, -3, 3);
+    const before = active.boosts[key] ?? 0;
+    const after = clamp(before + delta, MIN_BOOST_STAGE, MAX_BOOST_STAGE);
+    active.boosts[key] = after;
+    if (after !== 0) active.boosts[key] = after;
+    else delete active.boosts[key];
+    if (before !== after) changes.push({ stat: key, before, after, delta: after - before });
+    else if (!options.silentIfNoChange) {
+      capped = true;
+      pushLog(state, `${creature.name}の${statLabels[key]}はこれ以上${delta > 0 ? '上がらない' : '下がらない'}！`, 'neutral');
+    }
   }
-  pushLog(state, message, side === 'player' ? 'good' : 'bad');
-  pushFx(state, { kind: 'boost', target: side, text: '能力' });
+
+  if (changes.length === 0) {
+    if (!options.silentIfNoChange && !capped) pushLog(state, 'しかし、能力は変化しなかった。', 'neutral');
+    return;
+  }
+
+  for (const change of changes) {
+    pushLog(state, boostMessage(creature.name, change.stat, change.delta), side === 'player' ? 'good' : 'bad');
+  }
+
+  pushFx(state, {
+    kind: 'boost',
+    source: options.source,
+    target: side,
+    moveName: options.move?.name,
+    moveType: options.move?.type,
+    text: changes.map((change) => `${statShortLabel(change.stat)}${change.delta > 0 ? '+' : ''}${change.delta}`).join(' / '),
+  });
 }
 
 function heal(state: BattleState, side: BattleSide, amount: number, message: string): void {
@@ -408,15 +472,50 @@ function checkForcedSwitchOrWin(state: BattleState): void {
   }
 }
 
-function modifiedStat(state: BattleState, side: BattleSide, stat: keyof Stats): number {
+function modifiedStat(state: BattleState, side: BattleSide, stat: keyof Stats, options: { critical?: boolean; role?: 'attack' | 'defense' } = {}): number {
   const active = getActive(state, side);
   const creature = getActiveCreature(state, side);
-  const boost = active.boosts[stat] ?? 0;
-  const factor = boost >= 0 ? (2 + boost) / 2 : 2 / (2 + Math.abs(boost));
+  const rawBoost = active.boosts[stat] ?? 0;
+  const boost =
+    options.critical && options.role === 'attack' && rawBoost < 0 ? 0 :
+    options.critical && options.role === 'defense' && rawBoost > 0 ? 0 :
+    rawBoost;
+  const factor = statStageMultiplier(boost);
   const paralysis = stat === 'spe' && active.statuses.some((status) => status.name === 'paralyze') ? 0.65 : 1;
   const burn = stat === 'atk' && active.statuses.some((status) => status.name === 'burn') ? 0.75 : 1;
   const baseStat = stat === 'hp' ? active.maxHp : battleStat(creature.stats[stat]);
   return Math.round(baseStat * factor * paralysis * burn);
+}
+
+export function statStageMultiplier(stage: number): number {
+  const clamped = clamp(stage, MIN_BOOST_STAGE, MAX_BOOST_STAGE);
+  return clamped >= 0 ? (2 + clamped) / 2 : 2 / (2 + Math.abs(clamped));
+}
+
+function resetBoosts(active: ActiveCreature): void {
+  active.boosts = {};
+}
+
+function boostMessage(creatureName: string, stat: keyof Stats, delta: number): string {
+  const label = statLabels[stat];
+  if (delta >= 3) return `${creatureName}の${label}がぐぐーんと上がった！`;
+  if (delta === 2) return `${creatureName}の${label}がぐーんと上がった！`;
+  if (delta === 1) return `${creatureName}の${label}が上がった！`;
+  if (delta <= -3) return `${creatureName}の${label}ががくーんと下がった！`;
+  if (delta === -2) return `${creatureName}の${label}ががくっと下がった！`;
+  return `${creatureName}の${label}が下がった！`;
+}
+
+function statShortLabel(stat: keyof Stats): string {
+  const labels: Record<keyof Stats, string> = {
+    hp: 'HP',
+    atk: '攻',
+    def: '防',
+    spa: '特攻',
+    spd: '特防',
+    spe: '速',
+  };
+  return labels[stat];
 }
 
 function battleHp(baseHp: number): number {

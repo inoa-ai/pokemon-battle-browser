@@ -120,7 +120,7 @@ const typeMovePool: Record<ElementType, Move[]> = {
     statusMove('synthesis', 'こうごうせい', 'Grass', 10, '光を集めてHPを回復する。', 'recover', { kind: 'heal', percent: 40 }),
   ],
   Ice: [
-    damageMove('icy-wind', 'こごえるかぜ', 'Ice', 'special', 55, 95, 15, '冷たい風で攻撃。素早さを下げることがある。', 'ice-beam', { statDrop: { spe: -1 } }),
+    damageMove('icy-wind', 'こごえるかぜ', 'Ice', 'special', 55, 95, 15, '冷たい風で攻撃。素早さを下げる。', 'ice-beam', { statDrop: { spe: -1 }, statDropChance: 100 }),
     damageMove('ice-shard', 'こおりのつぶて', 'Ice', 'physical', 40, 100, 30, '氷のつぶてで先制攻撃する。', 'ice-beam', {}, 1),
   ],
   Fighting: [
@@ -129,10 +129,10 @@ const typeMovePool: Record<ElementType, Move[]> = {
   ],
   Poison: [
     damageMove('venoshock', 'ベノムショック', 'Poison', 'special', 65, 100, 10, '毒の衝撃で攻撃する。', 'poison-burst'),
-    damageMove('acid-spray', 'アシッドボム', 'Poison', 'special', 40, 100, 20, '酸で攻撃。特防を下げることがある。', 'poison-wave', { statDrop: { spd: -1 } }),
+    damageMove('acid-spray', 'アシッドボム', 'Poison', 'special', 40, 100, 20, '酸で攻撃。特防を大きく下げる。', 'poison-wave', { statDrop: { spd: -2 }, statDropChance: 100 }),
   ],
   Ground: [
-    damageMove('bulldoze', 'じならし', 'Ground', 'physical', 60, 100, 20, '地面を揺らして攻撃。素早さを下げることがある。', 'heavy-slam', { statDrop: { spe: -1 } }),
+    damageMove('bulldoze', 'じならし', 'Ground', 'physical', 60, 100, 20, '地面を揺らして攻撃。素早さを下げる。', 'heavy-slam', { statDrop: { spe: -1 }, statDropChance: 100 }),
     damageMove('dig', 'あなをほる', 'Ground', 'physical', 80, 100, 10, '地面から飛び出して攻撃する。', 'quick-strike'),
   ],
   Flying: [
@@ -156,7 +156,7 @@ const typeMovePool: Record<ElementType, Move[]> = {
     statusMove('fake-tears', 'うそなき', 'Dark', 20, '相手の特防を大きく下げる。', 'taunt', { kind: 'boost', boosts: { spd: -2 }, target: 'opponent' }),
   ],
   Steel: [
-    damageMove('metal-claw', 'メタルクロー', 'Steel', 'physical', 50, 95, 35, '鋼の爪で攻撃。防御を下げることがある。', 'metal-tail', { statDrop: { def: -1 } }),
+    damageMove('metal-claw', 'メタルクロー', 'Steel', 'physical', 50, 95, 35, '鋼の爪で攻撃。攻撃が上がることがある。', 'metal-tail', { statChange: { boosts: { atk: 1 }, target: 'self', chance: 10 } }),
     statusMove('iron-defense', 'てっぺき', 'Steel', 15, '防御を大きく上げる。', 'iron-wall', { kind: 'boost', boosts: { def: 2 } }),
   ],
   Fairy: [
@@ -208,7 +208,7 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('pikachu') },
     moves: [
       damageMove('thunderbolt', '10まんボルト', 'Electric', 'special', 90, 100, 15, '強力な電撃。20%で麻痺。', 'lightning', { paralyzeChance: 20 }),
-      damageMove('iron-tail', 'アイアンテール', 'Steel', 'physical', 100, 75, 15, '鋼の尾で攻撃。防御を下げることがある。', 'metal-tail', { statDrop: { def: -1 } }),
+      damageMove('iron-tail', 'アイアンテール', 'Steel', 'physical', 100, 75, 15, '鋼の尾で攻撃。防御を下げることがある。', 'metal-tail', { statDrop: { def: -1 }, statDropChance: 30 }),
       damageMove('quick-attack', 'でんこうせっか', 'Normal', 'physical', 40, 100, 30, '素早く先制攻撃する。', 'quick-strike', {}, 1),
       statusMove('agility', 'こうそくいどう', 'Psychic', 30, '素早さを大きく上げる。', 'speed-boost', { kind: 'boost', boosts: { spe: 2 } }),
     ],
@@ -266,7 +266,7 @@ export const creatures: Creature[] = [
     moves: [
       damageMove('hydro-pump', 'ハイドロポンプ', 'Water', 'special', 110, 80, 5, '大きな水の砲撃を放つ。', 'water-cannon'),
       damageMove('aqua-jet', 'アクアジェット', 'Water', 'physical', 40, 100, 20, '水をまとって先制攻撃。', 'water-dash', {}, 1),
-      damageMove('flash-cannon', 'ラスターカノン', 'Steel', 'special', 80, 100, 10, '光る鋼の砲撃。特防を下げることがある。', 'flash-cannon', { statDrop: { spd: -1 } }),
+      damageMove('flash-cannon', 'ラスターカノン', 'Steel', 'special', 80, 100, 10, '光る鋼の砲撃。特防を下げることがある。', 'flash-cannon', { statDrop: { spd: -1 }, statDropChance: 10 }),
       statusMove('iron-defense', 'てっぺき', 'Steel', 15, '防御を大きく上げる。', 'iron-wall', { kind: 'boost', boosts: { def: 2 } }),
     ],
   },
@@ -283,7 +283,7 @@ export const creatures: Creature[] = [
     palette: { primary: '#65b95d', secondary: '#a66ad6', accent: '#f0a6c9' },
     art: { imageUrl: artUrl('venusaur') },
     moves: [
-      damageMove('energy-ball', 'エナジーボール', 'Grass', 'special', 90, 100, 10, '自然の力をぶつける。特防を下げることがある。', 'energy-ball', { statDrop: { spd: -1 } }),
+      damageMove('energy-ball', 'エナジーボール', 'Grass', 'special', 90, 100, 10, '自然の力をぶつける。特防を下げることがある。', 'energy-ball', { statDrop: { spd: -1 }, statDropChance: 10 }),
       damageMove('sludge-bomb', 'ヘドロばくだん', 'Poison', 'special', 90, 100, 10, '毒の塊を投げる。', 'poison-burst'),
       damageMove('giga-drain', 'ギガドレイン', 'Grass', 'special', 75, 100, 10, '与えたダメージの一部を回復する。', 'drain', { drain: 0.5 }),
       statusMove('leech-seed', 'やどりぎのタネ', 'Grass', 10, '相手に種を植え、毎ターンHPを削る。', 'seed', { kind: 'status', status: 'seed', chance: 100, duration: 4 }, 90),
@@ -302,7 +302,7 @@ export const creatures: Creature[] = [
     palette: { primary: '#6f63a8', secondary: '#332b4c', accent: '#d6b1ff' },
     art: { imageUrl: artUrl('gengar') },
     moves: [
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       damageMove('sludge-wave', 'ヘドロウェーブ', 'Poison', 'special', 95, 100, 10, '毒の波で攻撃する。', 'poison-wave'),
       damageMove('dark-pulse', 'あくのはどう', 'Dark', 'special', 80, 100, 15, '悪意の波動で攻撃する。', 'dark-pulse'),
       statusMove('taunt', 'ちょうはつ', 'Dark', 20, '相手を挑発し、補助技を使いにくくする。', 'taunt', { kind: 'status', status: 'taunt', chance: 100, duration: 3 }, 100),
@@ -322,7 +322,7 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('lucario') },
     moves: [
       damageMove('aura-sphere', 'はどうだん', 'Fighting', 'special', 80, 100, 20, '必中級の波導弾を放つ。', 'aura'),
-      damageMove('meteor-mash', 'コメットパンチ', 'Steel', 'physical', 90, 90, 10, '鋼の拳で攻撃。攻撃が上がることがある。', 'meteor-punch', { statDrop: { def: -1 } }),
+      damageMove('meteor-mash', 'コメットパンチ', 'Steel', 'physical', 90, 90, 10, '鋼の拳で攻撃。攻撃が上がることがある。', 'meteor-punch', { statChange: { boosts: { atk: 1 }, target: 'self', chance: 20 } }),
       damageMove('extreme-speed', 'しんそく', 'Normal', 'physical', 80, 100, 5, '神速で先制攻撃する。', 'extreme-speed', {}, 2),
       statusMove('swords-dance', 'つるぎのまい', 'Normal', 20, '攻撃を大きく上げる。', 'swords', { kind: 'boost', boosts: { atk: 2 } }),
     ],
@@ -360,8 +360,8 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('vaporeon') },
     moves: [
       damageMove('surf', 'なみのり', 'Water', 'special', 90, 100, 15, '大きな波で安定して攻撃する。', 'water-cannon'),
-      damageMove('aurora-beam', 'オーロラビーム', 'Ice', 'special', 65, 100, 20, '虹色の光線で攻撃。攻撃を下げることがある。', 'ice-beam', { statDrop: { atk: -1 } }),
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('aurora-beam', 'オーロラビーム', 'Ice', 'special', 65, 100, 20, '虹色の光線で攻撃。攻撃を下げることがある。', 'ice-beam', { statDrop: { atk: -1 }, statDropChance: 10 }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       statusMove('aqua-ring', 'アクアリング', 'Water', 15, '水の輪でHPを回復する。', 'water-dash', { kind: 'heal', percent: 35 }),
     ],
   },
@@ -379,7 +379,7 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('jolteon') },
     moves: [
       damageMove('discharge', 'ほうでん', 'Electric', 'special', 80, 100, 15, '周囲に電撃を放つ。25%で麻痺。', 'lightning', { paralyzeChance: 25 }),
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       damageMove('quick-attack', 'でんこうせっか', 'Normal', 'physical', 40, 100, 30, '素早く先制攻撃する。', 'quick-strike', {}, 1),
       statusMove('agility', 'こうそくいどう', 'Psychic', 30, '素早さを大きく上げる。', 'speed-boost', { kind: 'boost', boosts: { spe: 2 } }),
     ],
@@ -416,8 +416,8 @@ export const creatures: Creature[] = [
     palette: { primary: '#c892e8', secondary: '#684a86', accent: '#f7d7ff' },
     art: { imageUrl: artUrl('espeon') },
     moves: [
-      damageMove('psychic', 'サイコキネシス', 'Psychic', 'special', 90, 100, 10, '念力で攻撃。特防を下げることがある。', 'psystrike', { statDrop: { spd: -1 } }),
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('psychic', 'サイコキネシス', 'Psychic', 'special', 90, 100, 10, '念力で攻撃。特防を下げることがある。', 'psystrike', { statDrop: { spd: -1 }, statDropChance: 10 }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       damageMove('swift', 'スピードスター', 'Normal', 'special', 60, 100, 20, '星型の光で安定して攻撃する。', 'stars'),
       statusMove('calm-mind', 'めいそう', 'Psychic', 20, '特攻と特防を上げる。', 'focus', { kind: 'boost', boosts: { spa: 1, spd: 1 } }),
     ],
@@ -436,7 +436,7 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('umbreon') },
     moves: [
       damageMove('foul-play', 'イカサマ', 'Dark', 'physical', 80, 100, 15, '相手の力を利用する悪技。', 'dark-pulse'),
-      damageMove('snarl', 'バークアウト', 'Dark', 'special', 55, 95, 15, '大きな声で攻撃。特攻を下げることがある。', 'bite', { statDrop: { spa: -1 } }),
+      damageMove('snarl', 'バークアウト', 'Dark', 'special', 55, 95, 15, '大きな声で攻撃。特攻を下げる。', 'bite', { statDrop: { spa: -1 }, statDropChance: 100 }),
       damageMove('quick-attack', 'でんこうせっか', 'Normal', 'physical', 40, 100, 30, '素早く先制攻撃する。', 'quick-strike', {}, 1),
       statusMove('moonlight', 'つきのひかり', 'Normal', 10, '月の光でHPを回復する。', 'recover', { kind: 'heal', percent: 45 }),
     ],
@@ -474,7 +474,7 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('glaceon') },
     moves: [
       damageMove('ice-beam', 'れいとうビーム', 'Ice', 'special', 90, 100, 10, '冷気の光線で攻撃する。', 'ice-beam'),
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       damageMove('water-pulse', 'みずのはどう', 'Water', 'special', 60, 100, 20, '水の波動で安定して攻撃する。', 'water-cannon'),
       statusMove('barrier', 'バリアー', 'Psychic', 20, '防御を大きく上げる。', 'iron-wall', { kind: 'boost', boosts: { def: 2 } }),
     ],
@@ -492,9 +492,9 @@ export const creatures: Creature[] = [
     palette: { primary: '#f2a7d8', secondary: '#5f89c8', accent: '#fff2fb' },
     art: { imageUrl: artUrl('sylveon') },
     moves: [
-      damageMove('moonblast', 'ムーンフォース', 'Fairy', 'special', 90, 100, 15, '月の力で攻撃。特攻を下げることがある。', 'psystrike', { statDrop: { spa: -1 } }),
+      damageMove('moonblast', 'ムーンフォース', 'Fairy', 'special', 90, 100, 15, '月の力で攻撃。特攻を下げることがある。', 'psystrike', { statDrop: { spa: -1 }, statDropChance: 30 }),
       damageMove('swift', 'スピードスター', 'Normal', 'special', 60, 100, 20, '星型の光で安定して攻撃する。', 'stars'),
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       statusMove('calm-mind', 'めいそう', 'Psychic', 20, '特攻と特防を上げる。', 'focus', { kind: 'boost', boosts: { spa: 1, spd: 1 } }),
     ],
   },
@@ -549,8 +549,8 @@ export const creatures: Creature[] = [
     palette: { primary: '#d9b25f', secondary: '#6b4b24', accent: '#fff1bd' },
     art: { imageUrl: artUrl('alakazam') },
     moves: [
-      damageMove('psychic', 'サイコキネシス', 'Psychic', 'special', 90, 100, 10, '念力で攻撃。特防を下げることがある。', 'psystrike', { statDrop: { spd: -1 } }),
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('psychic', 'サイコキネシス', 'Psychic', 'special', 90, 100, 10, '念力で攻撃。特防を下げることがある。', 'psystrike', { statDrop: { spd: -1 }, statDropChance: 10 }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       damageMove('focus-blast', 'きあいだま', 'Fighting', 'special', 80, 85, 10, '気合の弾で苦手な相手を崩す。', 'aura'),
       statusMove('calm-mind', 'めいそう', 'Psychic', 20, '特攻と特防を上げる。', 'focus', { kind: 'boost', boosts: { spa: 1, spd: 1 } }),
     ],
@@ -607,7 +607,7 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('arcanine') },
     moves: [
       damageMove('flamethrower', 'かえんほうしゃ', 'Fire', 'special', 90, 100, 15, '炎を吐いて攻撃。10%で火傷。', 'flame', { burnChance: 10 }),
-      damageMove('crunch', 'かみくだく', 'Dark', 'physical', 80, 100, 15, '鋭くかみ砕く。防御を下げることがある。', 'bite', { statDrop: { def: -1 } }),
+      damageMove('crunch', 'かみくだく', 'Dark', 'physical', 80, 100, 15, '鋭くかみ砕く。防御を下げることがある。', 'bite', { statDrop: { def: -1 }, statDropChance: 20 }),
       damageMove('extreme-speed', 'しんそく', 'Normal', 'physical', 80, 100, 5, '神速で先制攻撃する。', 'extreme-speed', {}, 2),
       statusMove('howl', 'とおぼえ', 'Normal', 20, '攻撃を上げる。', 'swords', { kind: 'boost', boosts: { atk: 1 } }),
     ],
@@ -645,7 +645,7 @@ export const creatures: Creature[] = [
     art: { imageUrl: artUrl('mewtwo') },
     moves: [
       damageMove('psystrike', 'サイコブレイク', 'Psychic', 'special', 100, 100, 10, '強烈な精神波で攻撃する。', 'psystrike'),
-      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
+      damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 }, statDropChance: 20 }),
       damageMove('ice-beam', 'れいとうビーム', 'Ice', 'special', 90, 100, 10, '冷気の光線で攻撃する。', 'ice-beam'),
       statusMove('recover', 'じこさいせい', 'Normal', 10, 'HPを半分回復する。', 'recover', { kind: 'heal', percent: 50 }),
     ],

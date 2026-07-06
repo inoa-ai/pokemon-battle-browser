@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { creatures, typeColors, typeLabels } from '../data/creatures';
 import { canChallengeBoss, getBossBattle } from './bosses';
-import { createBattle, getActiveMoves, performTurn, randomFoeTeam } from './battle';
+import { createBattle, getActiveMoves, performTurn, randomFoeTeam, statStageMultiplier } from './battle';
 
 describe('battle engine', () => {
   const withFixedRandom = <T>(value: number, run: () => T): T => {
@@ -125,6 +125,49 @@ describe('battle engine', () => {
     expect(canChallengeBoss(['mewtwo', 'sylveon', 'machamp'], teamBoss)).toBe(false);
     expect(canChallengeBoss(['machamp', 'mewtwo', 'sylveon'], teamBoss)).toBe(false);
     expect(canChallengeBoss(['mewtwo', 'sylveon', 'pikachu'], teamBoss)).toBe(true);
+  });
+
+  it('uses the full Pokemon-style stat stage multiplier range', () => {
+    expect(statStageMultiplier(2)).toBe(2);
+    expect(statStageMultiplier(6)).toBe(4);
+    expect(statStageMultiplier(-6)).toBe(0.25);
+    expect(statStageMultiplier(99)).toBe(4);
+    expect(statStageMultiplier(-99)).toBe(0.25);
+  });
+
+  it('applies visible boost stages from setup moves', () => {
+    withFixedRandom(0.5, () => {
+      const battle = createBattle(['lucario', 'pikachu', 'venusaur'], ['snorlax', 'gengar', 'mewtwo']);
+      const next = performTurn(battle, { kind: 'move', moveId: 'swords-dance' });
+
+      expect(next.playerTeam[0].boosts.atk).toBe(2);
+      expect(next.fx.some((event) => event.kind === 'boost' && event.text === '攻+2')).toBe(true);
+      expect(next.log.some((entry) => entry.text.includes('攻撃がぐーんと上がった'))).toBe(true);
+    });
+  });
+
+  it('applies guaranteed damaging-move debuffs with their stage amount', () => {
+    withFixedRandom(0.5, () => {
+      const battle = createBattle(
+        [{ creatureId: 'venusaur', moveIds: ['acid-spray', 'energy-ball', 'protect', 'work-up'] }],
+        ['blastoise', 'gengar', 'mewtwo'],
+      );
+      const next = performTurn(battle, { kind: 'move', moveId: 'acid-spray' });
+
+      expect(next.foeTeam[0].boosts.spd).toBe(-2);
+      expect(next.log.some((entry) => entry.text.includes('特防ががくっと下がった'))).toBe(true);
+    });
+  });
+
+  it('resets stat stages when switching out', () => {
+    withFixedRandom(0.5, () => {
+      const battle = createBattle(['pikachu', 'charizard', 'venusaur'], ['blastoise', 'gengar', 'mewtwo']);
+      battle.playerTeam[0].boosts.spa = 4;
+      const next = performTurn(battle, { kind: 'switch', targetIndex: 1 });
+
+      expect(next.playerTeam[0].boosts).toEqual({});
+      expect(next.playerActive).toBe(1);
+    });
   });
 
   it('prevents damage when the target is immune', () => {

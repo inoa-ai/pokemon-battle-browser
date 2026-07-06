@@ -614,6 +614,38 @@ button:disabled {
   font-size: 0.76rem;
 }
 
+.boost-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 22px;
+  margin-top: 8px;
+}
+
+.boost-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 850;
+  line-height: 1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.boost-chip--up {
+  color: #d8ffe7;
+  background: rgba(104, 224, 146, 0.14);
+  border-color: rgba(104, 224, 146, 0.32);
+}
+
+.boost-chip--down {
+  color: #ffd0c3;
+  background: rgba(232, 93, 52, 0.14);
+  border-color: rgba(232, 93, 52, 0.32);
+}
+
 .hp-track {
   height: 12px;
   margin: 8px 0 6px;
