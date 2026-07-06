@@ -175,6 +175,8 @@ Completed first playable battle build:
 - 24 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options.
 - Official artwork is loaded from PokeAPI sprites `other/official-artwork` URLs.
 - Battle engine implemented locally for MVP: 3v3 teams, move choice, switching, PP, type matchups, HP, statuses, boosts, fainting, CPU actions, win/loss.
+- Team loadouts now support selecting four moves per Pokemon from a candidate move pool.
+- Boss mode added as a 3v1 battle against a strengthened solo Mewtwo.
 - Rich CSS/SVG-style action effects added: move flash, hit shake, type-colored bursts, particles, HP transitions, faint animation, status orbit, responsive layout.
 - Tests added in `src/game/battle.test.ts`.
 - Verification passed:

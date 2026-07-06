@@ -1,6 +1,6 @@
-import { creatures, getCreature } from '../data/creatures';
+import { creatures, getCreature, movePoolFor, normalizeMoveIds } from '../data/creatures';
 import { effectiveness, effectivenessTone } from './typeChart';
-import type { ActiveCreature, BattleChoice, BattleFxEvent, BattleLogEntry, BattleSide, BattleState, Creature, Move, Stats, StatusName } from './types';
+import type { ActiveCreature, BattleChoice, BattleFxEvent, BattleLogEntry, BattleSide, BattleState, Creature, Move, Stats, StatusName, TeamSelectionInput } from './types';
 
 let nextLogId = 1;
 let nextFxId = 1;
@@ -9,27 +9,39 @@ const statKeys: Array<keyof Stats> = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const BATTLE_LEVEL = 50;
 const CASUAL_DAMAGE_SCALE = 0.55;
 
-export function createActiveCreature(creature: Creature, side: BattleSide, slot: number): ActiveCreature {
-  const maxHp = battleHp(creature.stats.hp);
+export function createActiveCreature(creature: Creature, side: BattleSide, slot: number, moveIds?: string[], options: { hpMultiplier?: number; isBoss?: boolean } = {}): ActiveCreature {
+  const selectedMoveIds = normalizeMoveIds(creature, moveIds);
+  const selectedMoves = movePoolFor(creature).filter((move) => selectedMoveIds.includes(move.id));
+  const maxHp = Math.round(battleHp(creature.stats.hp) * (options.hpMultiplier ?? 1));
   return {
     uid: `${side}-${slot}-${creature.id}`,
     creatureId: creature.id,
+    moveIds: selectedMoveIds,
     hp: maxHp,
     maxHp,
-    pp: Object.fromEntries(creature.moves.map((move) => [move.id, move.maxPp])),
+    pp: Object.fromEntries(selectedMoves.map((move) => [move.id, move.maxPp])),
     boosts: {},
     statuses: [],
+    isBoss: options.isBoss,
   };
 }
 
-export function createBattle(playerIds: string[], foeIds: string[]): BattleState {
+export function createBattle(playerIds: TeamSelectionInput[], foeIds: TeamSelectionInput[], options: { mode?: BattleState['mode'] } = {}): BattleState {
   nextLogId = 1;
   nextFxId = 1;
-  const playerTeam = playerIds.map((id, index) => createActiveCreature(getCreature(id), 'player', index));
-  const foeTeam = foeIds.map((id, index) => createActiveCreature(getCreature(id), 'foe', index));
+  const playerTeam = playerIds.map((member, index) => {
+    const selection = normalizeTeamMember(member);
+    return createActiveCreature(getCreature(selection.creatureId), 'player', index, selection.moveIds);
+  });
+  const foeTeam = foeIds.map((member, index) => {
+    const selection = normalizeTeamMember(member);
+    const isBoss = options.mode === 'boss' && index === 0;
+    return createActiveCreature(getCreature(selection.creatureId), 'foe', index, selection.moveIds, { hpMultiplier: isBoss ? 3 : 1, isBoss });
+  });
 
   const state: BattleState = {
     phase: 'player-turn',
+    mode: options.mode ?? 'standard',
     turn: 1,
     playerTeam,
     foeTeam,
@@ -55,6 +67,13 @@ export function getActiveCreature(state: BattleState, side: BattleSide): Creatur
   return getCreature(getActive(state, side).creatureId);
 }
 
+export function getActiveMoves(state: BattleState, side: BattleSide): Move[] {
+  const active = getActive(state, side);
+  const creature = getActiveCreature(state, side);
+  const pool = movePoolFor(creature);
+  return active.moveIds.map((id) => pool.find((move) => move.id === id)).filter((move): move is Move => Boolean(move));
+}
+
 export function isFainted(active: ActiveCreature): boolean {
   return active.hp <= 0;
 }
@@ -67,9 +86,8 @@ export function availableSwitches(state: BattleState, side: BattleSide): number[
 
 export function validMoves(state: BattleState, side: BattleSide): Move[] {
   const active = getActive(state, side);
-  const creature = getActiveCreature(state, side);
   const taunted = active.statuses.some((status) => status.name === 'taunt');
-  return creature.moves.filter((move) => active.pp[move.id] > 0 && (!taunted || move.category !== 'status'));
+  return getActiveMoves(state, side).filter((move) => (active.pp[move.id] ?? 0) > 0 && (!taunted || move.category !== 'status'));
 }
 
 export function performTurn(state: BattleState, playerChoice: BattleChoice): BattleState {
@@ -120,7 +138,7 @@ function chooseFoeAction(state: BattleState): BattleChoice {
   }
 
   const moves = validMoves(state, 'foe');
-  if (moves.length === 0) return { kind: 'move', moveId: getActiveCreature(state, 'foe').moves[0].id };
+  if (moves.length === 0) return { kind: 'move', moveId: getActiveMoves(state, 'foe')[0].id };
 
   const player = getActiveCreature(state, 'player');
   const best = [...moves].sort((a, b) => scoreMove(b, player) - scoreMove(a, player))[0];
@@ -143,7 +161,7 @@ function orderActions(state: BattleState, actions: Array<{ side: BattleSide; cho
 function actionPriority(state: BattleState, action: { side: BattleSide; choice: BattleChoice }): number {
   const choice = action.choice;
   if (choice.kind !== 'move') return 6;
-  const move = getActiveCreature(state, action.side).moves.find((entry) => entry.id === choice.moveId);
+  const move = getActiveMoves(state, action.side).find((entry) => entry.id === choice.moveId);
   return move?.priority ?? 0;
 }
 
@@ -155,8 +173,13 @@ function resolveChoice(state: BattleState, side: BattleSide, choice: BattleChoic
 
   const source = getActive(state, side);
   const creature = getActiveCreature(state, side);
-  const move = creature.moves.find((entry) => entry.id === choice.moveId) ?? creature.moves[0];
-  if (source.pp[move.id] <= 0) {
+  const moves = getActiveMoves(state, side);
+  const move = moves.find((entry) => entry.id === choice.moveId);
+  if (!move) {
+    pushLog(state, `${creature.name}はその技を使えない。`, side === 'player' ? 'bad' : 'good');
+    return;
+  }
+  if ((source.pp[move.id] ?? 0) <= 0) {
     pushLog(state, `${creature.name}は${move.name}のPPが足りない。`, side === 'player' ? 'bad' : 'good');
     return;
   }
@@ -461,4 +484,9 @@ export function randomFoeTeam(): string[] {
 
 function shuffle<T>(items: T[]): T[] {
   return [...items].sort(() => Math.random() - 0.5);
+}
+
+function normalizeTeamMember(member: TeamSelectionInput): { creatureId: string; moveIds?: string[] } {
+  if (typeof member === 'string') return { creatureId: member };
+  return member;
 }

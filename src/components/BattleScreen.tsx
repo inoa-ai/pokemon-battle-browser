@@ -2,8 +2,8 @@ import { ArrowLeftRight, RotateCcw, Users } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { useEffect, useMemo } from 'react';
 import { RosterPortrait } from './CreatureCard';
-import { creatures, getCreature, typeColors, typeLabels } from '../data/creatures';
-import { availableSwitches, getActive, getActiveCreature, performTurn, validMoves } from '../game/battle';
+import { getCreature, typeColors, typeLabels } from '../data/creatures';
+import { availableSwitches, getActive, getActiveCreature, getActiveMoves, performTurn, validMoves } from '../game/battle';
 import type { ActiveCreature, BattleChoice, BattleFxEvent, BattleSide, BattleState, Creature, Move, StatusName } from '../game/types';
 
 interface BattleScreenProps {
@@ -22,6 +22,7 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
   const foe = getActive(battle, 'foe');
   const playerCreature = getActiveCreature(battle, 'player');
   const foeCreature = getActiveCreature(battle, 'foe');
+  const playerMoves = getActiveMoves(battle, 'player');
   const moves = validMoves(battle, 'player');
   const switches = availableSwitches(battle, 'player');
   const latestLogs = battle.log.slice(-8).reverse();
@@ -54,6 +55,7 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
         <div>
           <span>ターン {battle.turn}</span>
           <h1>{playerCreature.name} 対 {foeCreature.name}</h1>
+          {battle.mode === 'boss' && <p className="battle-subtitle">ボス戦: ミュウツー撃破</p>}
         </div>
         <div className="battle-header__actions">
           <button className="toolbar-button" onClick={onOpenRoster}>
@@ -84,12 +86,12 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
             <strong>{busy ? '処理中...' : battle.phase === 'finished' ? 'バトル終了' : '行動を選択'}</strong>
           </div>
           <div className="move-grid">
-            {playerCreature.moves.map((move) => (
+            {playerMoves.map((move) => (
               <MoveButton
                 key={move.id}
                 move={move}
                 available={moves.some((entry) => entry.id === move.id)}
-                pp={player.pp[move.id]}
+                pp={player.pp[move.id] ?? 0}
                 disabled={busy || battle.phase === 'finished'}
                 onClick={() => choose({ kind: 'move', moveId: move.id })}
               />
@@ -128,7 +130,7 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
       {battle.phase === 'finished' && (
         <div className="result-overlay">
           <div>
-            <span>{battle.winner === 'player' ? 'アリーナ制覇' : 'チーム全滅'}</span>
+            <span>{resultLabel(battle)}</span>
             <h2>{battle.winner === 'player' ? '勝利' : '敗北'}</h2>
             <button className="primary-button" onClick={onRestart}>
               <RotateCcw size={18} />
@@ -139,6 +141,11 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
       )}
     </section>
   );
+}
+
+function resultLabel(battle: BattleState): string {
+  if (battle.mode === 'boss') return battle.winner === 'player' ? 'ミュウツー撃破' : 'ボスに敗北';
+  return battle.winner === 'player' ? 'アリーナ制覇' : 'チーム全滅';
 }
 
 function Battler({ side, active, creature, currentFx }: { side: BattleSide; active: ActiveCreature; creature: Creature; currentFx?: BattleFxEvent }) {

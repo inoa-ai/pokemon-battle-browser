@@ -73,12 +73,14 @@ export interface Creature {
 export interface ActiveCreature {
   uid: string;
   creatureId: string;
+  moveIds: string[];
   hp: number;
   maxHp: number;
   pp: Record<string, number>;
   boosts: Partial<Record<keyof Stats, number>>;
   statuses: Array<{ name: StatusName; duration: number }>;
   abilityUsed?: boolean;
+  isBoss?: boolean;
 }
 
 export interface BattleLogEntry {
@@ -114,6 +116,7 @@ export interface BattleFxEvent {
 
 export interface BattleState {
   phase: 'selecting' | 'player-turn' | 'animating' | 'finished';
+  mode?: 'standard' | 'boss';
   turn: number;
   playerTeam: ActiveCreature[];
   foeTeam: ActiveCreature[];
@@ -143,3 +146,10 @@ export interface SwitchChoice {
 }
 
 export type BattleChoice = MoveChoice | SwitchChoice;
+
+export interface TeamMemberSelection {
+  creatureId: string;
+  moveIds?: string[];
+}
+
+export type TeamSelectionInput = string | TeamMemberSelection;

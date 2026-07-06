@@ -92,6 +92,107 @@ const statusMove = (
   description,
 });
 
+const universalMovePool: Move[] = [
+  damageMove('tackle', 'たいあたり', 'Normal', 'physical', 50, 100, 35, '基本の体当たりで攻撃する。', 'body-slam'),
+  statusMove('work-up', 'ふるいたてる', 'Normal', 25, '攻撃と特攻を上げる。', 'focus', { kind: 'boost', boosts: { atk: 1, spa: 1 } }),
+  statusMove('protect', 'まもる', 'Normal', 10, 'このターンのダメージを軽減する。', 'guard', { kind: 'guard', duration: 1 }, 100, 1),
+];
+
+const typeMovePool: Record<ElementType, Move[]> = {
+  Normal: [
+    damageMove('headbutt', 'ずつき', 'Normal', 'physical', 70, 100, 15, '頭突きで安定して攻撃する。', 'body-slam'),
+    statusMove('growl', 'なきごえ', 'Normal', 30, '相手の攻撃を下げる。', 'taunt', { kind: 'boost', boosts: { atk: -1 }, target: 'opponent' }),
+  ],
+  Fire: [
+    damageMove('flame-wheel', 'かえんぐるま', 'Fire', 'physical', 60, 100, 25, '炎をまとって攻撃。10%で火傷。', 'flame', { burnChance: 10 }),
+    statusMove('will-o-wisp', 'おにび', 'Fire', 15, '相手を火傷にする。', 'flame', { kind: 'status', status: 'burn', chance: 85, duration: 4 }, 85),
+  ],
+  Water: [
+    damageMove('water-pulse', 'みずのはどう', 'Water', 'special', 60, 100, 20, '水の波動で安定して攻撃する。', 'water-cannon'),
+    damageMove('aqua-tail', 'アクアテール', 'Water', 'physical', 90, 90, 10, '水をまとった尾で強く攻撃する。', 'water-dash'),
+  ],
+  Electric: [
+    damageMove('spark', 'スパーク', 'Electric', 'physical', 65, 100, 20, '電気をまとって攻撃。20%で麻痺。', 'lightning', { paralyzeChance: 20 }),
+    statusMove('charge', 'じゅうでん', 'Electric', 20, '特攻と特防を上げる。', 'lightning', { kind: 'boost', boosts: { spa: 1, spd: 1 } }),
+  ],
+  Grass: [
+    damageMove('razor-leaf', 'はっぱカッター', 'Grass', 'physical', 55, 95, 25, '鋭い葉で相手を切りつける。', 'energy-ball'),
+    statusMove('synthesis', 'こうごうせい', 'Grass', 10, '光を集めてHPを回復する。', 'recover', { kind: 'heal', percent: 40 }),
+  ],
+  Ice: [
+    damageMove('icy-wind', 'こごえるかぜ', 'Ice', 'special', 55, 95, 15, '冷たい風で攻撃。素早さを下げることがある。', 'ice-beam', { statDrop: { spe: -1 } }),
+    damageMove('ice-shard', 'こおりのつぶて', 'Ice', 'physical', 40, 100, 30, '氷のつぶてで先制攻撃する。', 'ice-beam', {}, 1),
+  ],
+  Fighting: [
+    damageMove('brick-break', 'かわらわり', 'Fighting', 'physical', 75, 100, 15, '力強く打ち砕いて攻撃する。', 'aura'),
+    statusMove('bulk-up', 'ビルドアップ', 'Fighting', 20, '攻撃と防御を上げる。', 'swords', { kind: 'boost', boosts: { atk: 1, def: 1 } }),
+  ],
+  Poison: [
+    damageMove('venoshock', 'ベノムショック', 'Poison', 'special', 65, 100, 10, '毒の衝撃で攻撃する。', 'poison-burst'),
+    damageMove('acid-spray', 'アシッドボム', 'Poison', 'special', 40, 100, 20, '酸で攻撃。特防を下げることがある。', 'poison-wave', { statDrop: { spd: -1 } }),
+  ],
+  Ground: [
+    damageMove('bulldoze', 'じならし', 'Ground', 'physical', 60, 100, 20, '地面を揺らして攻撃。素早さを下げることがある。', 'heavy-slam', { statDrop: { spe: -1 } }),
+    damageMove('dig', 'あなをほる', 'Ground', 'physical', 80, 100, 10, '地面から飛び出して攻撃する。', 'quick-strike'),
+  ],
+  Flying: [
+    damageMove('wing-attack', 'つばさでうつ', 'Flying', 'physical', 60, 100, 35, '翼で相手を打つ。', 'air-cut'),
+    statusMove('tailwind', 'おいかぜ', 'Flying', 15, '味方側の素早さを大きく上げる。', 'speed-boost', { kind: 'boost', boosts: { spe: 2 } }),
+  ],
+  Psychic: [
+    damageMove('psybeam', 'サイケこうせん', 'Psychic', 'special', 65, 100, 20, '不思議な光線で攻撃する。', 'psystrike'),
+    statusMove('reflect', 'リフレクター', 'Psychic', 20, '防御を大きく上げる。', 'iron-wall', { kind: 'boost', boosts: { def: 2 } }),
+  ],
+  Ghost: [
+    damageMove('hex', 'たたりめ', 'Ghost', 'special', 65, 100, 10, '怪しい力で攻撃する。', 'shadow-ball'),
+    statusMove('confuse-ray', 'あやしいひかり', 'Ghost', 10, '相手を惑わせ、補助技を使いにくくする。', 'taunt', { kind: 'status', status: 'taunt', chance: 85, duration: 2 }, 90),
+  ],
+  Dragon: [
+    damageMove('dragon-breath', 'りゅうのいぶき', 'Dragon', 'special', 60, 100, 20, '竜の息吹で攻撃。20%で麻痺。', 'dragon-rage', { paralyzeChance: 20 }),
+    damageMove('dragon-tail', 'ドラゴンテール', 'Dragon', 'physical', 60, 90, 10, '竜の尾で攻撃する。', 'dragon-claw'),
+  ],
+  Dark: [
+    damageMove('payback', 'しっぺがえし', 'Dark', 'physical', 70, 100, 10, '悪タイプの重い一撃を返す。', 'dark-pulse'),
+    statusMove('fake-tears', 'うそなき', 'Dark', 20, '相手の特防を大きく下げる。', 'taunt', { kind: 'boost', boosts: { spd: -2 }, target: 'opponent' }),
+  ],
+  Steel: [
+    damageMove('metal-claw', 'メタルクロー', 'Steel', 'physical', 50, 95, 35, '鋼の爪で攻撃。防御を下げることがある。', 'metal-tail', { statDrop: { def: -1 } }),
+    statusMove('iron-defense', 'てっぺき', 'Steel', 15, '防御を大きく上げる。', 'iron-wall', { kind: 'boost', boosts: { def: 2 } }),
+  ],
+  Fairy: [
+    damageMove('draining-kiss', 'ドレインキッス', 'Fairy', 'special', 50, 100, 10, '与えたダメージの多くを回復する。', 'drain', { drain: 0.75 }),
+    statusMove('baby-doll-eyes', 'つぶらなひとみ', 'Fairy', 30, '相手の攻撃を下げる先制技。', 'status-pop', { kind: 'boost', boosts: { atk: -1 }, target: 'opponent' }, 100, 1),
+  ],
+};
+
+export function movePoolFor(creature: Creature): Move[] {
+  const pool = [...creature.moves, ...creature.types.flatMap((type) => typeMovePool[type]), ...universalMovePool];
+  const unique = new Map<string, Move>();
+  for (const move of pool) {
+    if (!unique.has(move.id)) unique.set(move.id, move);
+  }
+  return [...unique.values()];
+}
+
+export function defaultMoveIds(creature: Creature): string[] {
+  return creature.moves.slice(0, 4).map((move) => move.id);
+}
+
+export function normalizeMoveIds(creature: Creature, moveIds?: string[]): string[] {
+  const pool = movePoolFor(creature);
+  const validIds = new Set(pool.map((move) => move.id));
+  const normalized = [...new Set(moveIds ?? [])].filter((id) => validIds.has(id)).slice(0, 4);
+  for (const move of creature.moves) {
+    if (normalized.length >= 4) break;
+    if (!normalized.includes(move.id)) normalized.push(move.id);
+  }
+  for (const move of pool) {
+    if (normalized.length >= 4) break;
+    if (!normalized.includes(move.id)) normalized.push(move.id);
+  }
+  return normalized;
+}
+
 export const creatures: Creature[] = [
   {
     id: 'pikachu',

@@ -192,6 +192,18 @@ button:disabled {
   margin: 14px 0;
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.boss-button {
+  background:
+    linear-gradient(135deg, rgba(215, 182, 255, 0.18), rgba(240, 111, 162, 0.1)),
+    rgba(255, 255, 255, 0.08);
+}
+
 .selection-pill {
   min-height: 34px;
   display: inline-flex;
@@ -206,6 +218,106 @@ button:disabled {
 .selection-pill--empty {
   color: #7e8795;
   border-style: dashed;
+}
+
+.loadout-panel {
+  margin: 14px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.loadout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.loadout-card {
+  min-width: 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--card-primary) 34%, rgba(255, 255, 255, 0.14));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--card-primary) 14%, transparent), transparent 48%),
+    rgba(15, 18, 23, 0.72);
+}
+
+.loadout-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.loadout-card__head span {
+  display: block;
+  color: #aeb8c8;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.loadout-card__head strong {
+  display: block;
+  margin-top: 2px;
+}
+
+.loadout-card__head em {
+  min-width: 40px;
+  text-align: center;
+  font-style: normal;
+  font-weight: 900;
+  color: #101216;
+  background: color-mix(in srgb, var(--card-primary) 76%, white);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.loadout-move-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.loadout-move {
+  min-height: 78px;
+  min-width: 0;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--move-color) 38%, rgba(255, 255, 255, 0.16));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--move-color) 15%, transparent), rgba(255, 255, 255, 0.04)),
+    rgba(255, 255, 255, 0.045);
+  color: #f8fbff;
+  text-align: left;
+  padding: 8px;
+  display: grid;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.loadout-move.is-selected {
+  border-color: color-mix(in srgb, var(--move-color) 82%, white);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--move-color) 70%, white);
+}
+
+.loadout-move span {
+  justify-self: start;
+  color: #101216;
+  background: var(--move-color);
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.loadout-move strong {
+  overflow-wrap: anywhere;
+}
+
+.loadout-move small {
+  color: #aeb8c8;
 }
 
 .roster-grid {
@@ -348,6 +460,12 @@ button:disabled {
   margin: 2px 0 0;
   font-size: clamp(1.35rem, 2.5vw, 2.2rem);
   letter-spacing: 0;
+}
+
+.battle-subtitle {
+  margin: 5px 0 0;
+  color: #f2a7d8;
+  font-weight: 850;
 }
 
 .battle-stage {
@@ -884,6 +1002,10 @@ button:disabled {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .loadout-grid {
+    grid-template-columns: 1fr;
+  }
+
   .roster-hero,
   .roster-hero__content {
     min-height: 440px;
@@ -942,6 +1064,15 @@ button:disabled {
 
   .battle-header {
     flex-direction: column;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .loadout-move-grid {
+    grid-template-columns: 1fr;
   }
 
   .battle-stage {

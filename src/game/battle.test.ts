@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { creatures, typeColors, typeLabels } from '../data/creatures';
-import { createBattle, performTurn, randomFoeTeam } from './battle';
+import { createBattle, getActiveMoves, performTurn, randomFoeTeam } from './battle';
 
 describe('battle engine', () => {
   const withFixedRandom = <T>(value: number, run: () => T): T => {
@@ -50,6 +50,41 @@ describe('battle engine', () => {
     expect(evolvedOptions.every((id) => rosterIds.has(id))).toBe(true);
     expect(typeColors.Fairy).toBeTruthy();
     expect(typeLabels.Fairy).toBe('フェアリー');
+  });
+
+  it('uses only the selected four moves for a custom loadout', () => {
+    const battle = createBattle(
+      [{ creatureId: 'pikachu', moveIds: ['tackle', 'protect', 'work-up', 'spark'] }],
+      ['blastoise'],
+    );
+    const moveIds = getActiveMoves(battle, 'player').map((move) => move.id);
+
+    expect(moveIds).toEqual(['tackle', 'protect', 'work-up', 'spark']);
+    expect(Object.keys(battle.playerTeam[0].pp).sort()).toEqual([...moveIds].sort());
+    expect(battle.playerTeam[0].pp.thunderbolt).toBeUndefined();
+  });
+
+  it('does not allow an unselected move to be used', () => {
+    const battle = createBattle(
+      [{ creatureId: 'pikachu', moveIds: ['tackle', 'protect', 'work-up', 'spark'] }],
+      ['blastoise'],
+    );
+    const before = battle.foeTeam[0].hp;
+    const next = performTurn(battle, { kind: 'move', moveId: 'thunderbolt' });
+
+    expect(next.foeTeam[0].hp).toBe(before);
+    expect(next.log.some((entry) => entry.text.includes('その技を使えない'))).toBe(true);
+  });
+
+  it('creates a boss battle against a strengthened solo Mewtwo', () => {
+    const normal = createBattle(['pikachu'], ['mewtwo']);
+    const boss = createBattle(['pikachu', 'charizard', 'venusaur'], [{ creatureId: 'mewtwo' }], { mode: 'boss' });
+
+    expect(boss.mode).toBe('boss');
+    expect(boss.foeTeam).toHaveLength(1);
+    expect(boss.foeTeam[0].creatureId).toBe('mewtwo');
+    expect(boss.foeTeam[0].isBoss).toBe(true);
+    expect(boss.foeTeam[0].maxHp).toBeGreaterThan(normal.foeTeam[0].maxHp);
   });
 
   it('prevents damage when the target is immune', () => {

@@ -1,16 +1,19 @@
-import { RotateCcw, Shuffle, Swords, Volume2, VolumeX } from 'lucide-react';
+import { RotateCcw, Shuffle, Swords, Trophy, Volume2, VolumeX } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { gameAudio } from './audio/gameAudio';
 import { BattleScreen } from './components/BattleScreen';
 import { CreatureCard } from './components/CreatureCard';
-import { creatures, defaultPlayerTeam } from './data/creatures';
+import { creatures, defaultMoveIds, defaultPlayerTeam, getCreature, movePoolFor, typeColors, typeLabels } from './data/creatures';
 import { createBattle, randomFoeTeam, randomTeams } from './game/battle';
-import type { BattleFxEvent, BattleState } from './game/types';
+import type { BattleFxEvent, BattleState, Move, TeamMemberSelection } from './game/types';
 
 const MAX_TEAM_SIZE = 3;
+type Loadouts = Record<string, string[]>;
 
 export default function App() {
   const [selected, setSelected] = useState<string[]>(defaultPlayerTeam);
+  const [loadouts, setLoadouts] = useState<Loadouts>(() => defaultLoadouts(defaultPlayerTeam));
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [fxQueue, setFxQueue] = useState<BattleFxEvent[]>([]);
   const [queuedFinalBattle, setQueuedFinalBattle] = useState<BattleState | null>(null);
@@ -20,7 +23,7 @@ export default function App() {
     return window.localStorage.getItem('pokemon-battle-sound') !== 'off';
   });
 
-  const canStart = selected.length === MAX_TEAM_SIZE;
+  const canStart = selected.length === MAX_TEAM_SIZE && selected.every((id) => selectedMoveIds(id, loadouts).length === 4);
   const currentFx = fxQueue[0];
   const selectedSet = useMemo(() => new Set(selected), [selected]);
 
@@ -46,6 +49,7 @@ export default function App() {
     activateAudio('tap');
     setBattle(null);
     setView('roster');
+    setLoadouts((current) => ensureLoadout(current, id));
     setSelected((current) => {
       if (current.includes(id)) return current.filter((entry) => entry !== id);
       if (current.length >= MAX_TEAM_SIZE) return [...current.slice(1), id];
@@ -53,10 +57,32 @@ export default function App() {
     });
   };
 
-  const startBattle = (playerTeam = selected, opponentTeam?: string[]) => {
-    if (playerTeam.length !== MAX_TEAM_SIZE) return;
+  const chooseMove = (creatureId: string, moveId: string) => {
+    activateAudio('tap');
+    setLoadouts((current) => {
+      const currentIds = selectedMoveIds(creatureId, current);
+      if (currentIds.includes(moveId)) {
+        return { ...current, [creatureId]: currentIds.filter((id) => id !== moveId) };
+      }
+      if (currentIds.length >= 4) {
+        return { ...current, [creatureId]: [...currentIds.slice(1), moveId] };
+      }
+      return { ...current, [creatureId]: [...currentIds, moveId] };
+    });
+  };
+
+  const startBattle = (playerTeam = selected, opponentTeam?: string[], sourceLoadouts = loadouts) => {
+    if (!canUseTeam(playerTeam, sourceLoadouts)) return;
     activateAudio('confirm');
-    const next = createBattle(playerTeam, opponentTeam ?? randomFoeTeam());
+    const next = createBattle(toTeamSelection(playerTeam, sourceLoadouts), opponentTeam ?? randomFoeTeam());
+    playBattleTimeline(next);
+    setView('battle');
+  };
+
+  const startBossBattle = (playerTeam = selected, sourceLoadouts = loadouts) => {
+    if (!canUseTeam(playerTeam, sourceLoadouts)) return;
+    activateAudio('confirm');
+    const next = createBattle(toTeamSelection(playerTeam, sourceLoadouts), [{ creatureId: 'mewtwo' }], { mode: 'boss' });
     playBattleTimeline(next);
     setView('battle');
   };
@@ -83,12 +109,15 @@ export default function App() {
 
   const randomize = () => {
     const teams = randomTeams();
+    const nextLoadouts = defaultLoadouts(teams.player);
     setSelected(teams.player);
-    startBattle(teams.player, teams.foe);
+    setLoadouts((current) => ({ ...current, ...nextLoadouts }));
+    startBattle(teams.player, teams.foe, { ...loadouts, ...nextLoadouts });
   };
 
   const reset = () => {
-    startBattle(selected);
+    if (battle?.mode === 'boss') startBossBattle(selected);
+    else startBattle(selected);
   };
 
   const toggleSound = () => {
@@ -138,10 +167,16 @@ export default function App() {
             <div className="roster-hero__content">
               <p>公式ポケモン ローカルバトル</p>
               <h1>3体を選択</h1>
-              <button className="primary-button" disabled={!canStart} onClick={() => startBattle()}>
-                <Swords size={18} />
-                バトル開始
-              </button>
+              <div className="hero-actions">
+                <button className="primary-button" disabled={!canStart} onClick={() => startBattle()}>
+                  <Swords size={18} />
+                  バトル開始
+                </button>
+                <button className="toolbar-button boss-button" disabled={!canStart} onClick={() => startBossBattle()}>
+                  <Trophy size={18} />
+                  ミュウツー撃破
+                </button>
+              </div>
             </div>
           </div>
 
@@ -160,6 +195,18 @@ export default function App() {
               </span>
             ))}
           </div>
+
+          <section className="loadout-panel">
+            <div className="panel-title">
+              <span>技設定</span>
+              <strong>各ポケモンの4技を選択</strong>
+            </div>
+            <div className="loadout-grid">
+              {selected.map((id) => (
+                <LoadoutEditor key={id} creatureId={id} selectedMoveIds={selectedMoveIds(id, loadouts)} onToggleMove={chooseMove} />
+              ))}
+            </div>
+          </section>
 
           <div className="roster-grid">
             {creatures.map((creature) => (
@@ -189,4 +236,59 @@ export default function App() {
       )}
     </main>
   );
+}
+
+function LoadoutEditor({ creatureId, selectedMoveIds, onToggleMove }: { creatureId: string; selectedMoveIds: string[]; onToggleMove: (creatureId: string, moveId: string) => void }) {
+  const creature = getCreature(creatureId);
+  const movePool = movePoolFor(creature);
+  return (
+    <article className="loadout-card" style={{ '--card-primary': creature.palette.primary } as CSSProperties}>
+      <div className="loadout-card__head">
+        <div>
+          <span>{creature.title}</span>
+          <strong>{creature.name}</strong>
+        </div>
+        <em>{selectedMoveIds.length}/4</em>
+      </div>
+      <div className="loadout-move-grid">
+        {movePool.map((move) => (
+          <LoadoutMoveButton key={move.id} move={move} selected={selectedMoveIds.includes(move.id)} onClick={() => onToggleMove(creatureId, move.id)} />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function LoadoutMoveButton({ move, selected, onClick }: { move: Move; selected: boolean; onClick: () => void }) {
+  return (
+    <button className={`loadout-move ${selected ? 'is-selected' : ''}`} style={{ '--move-color': typeColors[move.type] } as CSSProperties} onClick={onClick} type="button">
+      <span>{typeLabels[move.type]}</span>
+      <strong>{move.name}</strong>
+      <small>
+        {move.category === 'status' ? '補助' : move.category === 'physical' ? '物理' : '特殊'} / {move.power || '-'} / PP {move.maxPp}
+      </small>
+    </button>
+  );
+}
+
+function defaultLoadouts(ids: string[]): Loadouts {
+  return Object.fromEntries(ids.map((id) => [id, defaultMoveIds(getCreature(id))]));
+}
+
+function ensureLoadout(loadouts: Loadouts, creatureId: string): Loadouts {
+  if (loadouts[creatureId]?.length) return loadouts;
+  return { ...loadouts, [creatureId]: defaultMoveIds(getCreature(creatureId)) };
+}
+
+function selectedMoveIds(creatureId: string, loadouts: Loadouts): string[] {
+  const creature = getCreature(creatureId);
+  return (loadouts[creatureId] ?? defaultMoveIds(creature)).slice(0, 4);
+}
+
+function toTeamSelection(ids: string[], loadouts: Loadouts): TeamMemberSelection[] {
+  return ids.map((id) => ({ creatureId: id, moveIds: selectedMoveIds(id, loadouts) }));
+}
+
+function canUseTeam(ids: string[], loadouts: Loadouts): boolean {
+  return ids.length === MAX_TEAM_SIZE && ids.every((id) => selectedMoveIds(id, loadouts).length === 4);
 }
