@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { creatures, typeColors, typeLabels } from '../data/creatures';
 import { createBattle, performTurn, randomFoeTeam } from './battle';
 
 describe('battle engine', () => {
@@ -32,11 +33,23 @@ describe('battle engine', () => {
 
   it('creates a random foe team from the full roster', () => {
     const foeTeam = randomFoeTeam();
-    const rosterIds = new Set(['pikachu', 'charizard', 'blastoise', 'venusaur', 'gengar', 'lucario', 'eevee', 'snorlax', 'dragonite', 'mewtwo']);
+    const rosterIds = new Set(creatures.map((creature) => creature.id));
 
     expect(foeTeam).toHaveLength(3);
     expect(new Set(foeTeam).size).toBe(3);
     expect(foeTeam.every((id) => rosterIds.has(id))).toBe(true);
+  });
+
+  it('includes new species and every current evolution option', () => {
+    const rosterIds = new Set(creatures.map((creature) => creature.id));
+    const newSpecies = ['alakazam', 'machamp', 'lapras', 'arcanine', 'absol'];
+    const evolvedOptions = ['raichu', 'vaporeon', 'jolteon', 'flareon', 'espeon', 'umbreon', 'leafeon', 'glaceon', 'sylveon'];
+
+    expect(creatures).toHaveLength(24);
+    expect(newSpecies.every((id) => rosterIds.has(id))).toBe(true);
+    expect(evolvedOptions.every((id) => rosterIds.has(id))).toBe(true);
+    expect(typeColors.Fairy).toBeTruthy();
+    expect(typeLabels.Fairy).toBe('フェアリー');
   });
 
   it('prevents damage when the target is immune', () => {

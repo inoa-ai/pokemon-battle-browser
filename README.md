@@ -6,7 +6,8 @@
 
 ## Features
 
-- 10体の公式ポケモンと公式アート表示
+- 24体の公式ポケモンと公式アート表示
+- ピカチュウとイーブイの進化後を選択可能
 - 3体チーム選択
 - プレイヤー vs CPU のターン制バトル
 - タイプ相性、物理/特殊/補助技、PP、HP、状態異常、能力変化、交代
@@ -41,7 +42,7 @@ https://inoa-ai.github.io/pokemon-battle-browser/
 
 ## Project Structure
 
-- `src/data/creatures.ts`: 10体のポケモン、ステータス、技、タイプ、公式アートURL
+- `src/data/creatures.ts`: 24体のポケモン、ステータス、技、タイプ、公式アートURL
 - `src/game/battle.ts`: 戦闘エンジン
 - `src/game/typeChart.ts`: タイプ相性
 - `src/components/BattleScreen.tsx`: 戦闘UI

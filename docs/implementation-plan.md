@@ -172,7 +172,7 @@ If this project ever moves toward public release, replace official names/art wit
 Completed first playable battle build:
 
 - App scaffolded with `Vite + TypeScript + React`.
-- 10 official Pokemon roster implemented for local/private prototype use.
+- 24 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options.
 - Official artwork is loaded from PokeAPI sprites `other/official-artwork` URLs.
 - Battle engine implemented locally for MVP: 3v3 teams, move choice, switching, PP, type matchups, HP, statuses, boosts, fainting, CPU actions, win/loss.
 - Rich CSS/SVG-style action effects added: move flash, hit shake, type-colored bursts, particles, HP transitions, faint animation, status orbit, responsive layout.

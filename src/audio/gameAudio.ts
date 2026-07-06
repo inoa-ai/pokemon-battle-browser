@@ -19,6 +19,7 @@ const typeFrequencies: Record<ElementType, number> = {
   Dragon: 294,
   Dark: 208,
   Steel: 523,
+  Fairy: 880,
 };
 
 const rosterMelody = [72, 76, 79, 76, 74, 76, 72, 67, 69, 72, 76, 81, 79, 76, 74, 72];

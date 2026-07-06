@@ -13,7 +13,8 @@ export type ElementType =
   | 'Ghost'
   | 'Dragon'
   | 'Dark'
-  | 'Steel';
+  | 'Steel'
+  | 'Fairy';
 
 export type MoveCategory = 'physical' | 'special' | 'status';
 export type BattleSide = 'player' | 'foe';
