@@ -44,7 +44,7 @@ https://inoa-ai.github.io/pokemon-battle-browser/
 
 ## Project Structure
 
-- `src/data/creatures.ts`: 24体のポケモン、ステータス、技候補、タイプ、公式アートURL
+- `src/data/creatures.ts`: 24体のポケモン、ステータス、技候補、タイプ、ローカル同梱アート
 - `src/game/battle.ts`: 戦闘エンジン、技ロードアウト、ボス戦モード
 - `src/game/typeChart.ts`: タイプ相性
 - `src/components/BattleScreen.tsx`: 戦闘UI

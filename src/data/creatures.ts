@@ -40,7 +40,7 @@ export const typeLabels: Record<ElementType, string> = {
 
 type DamageEffect = Extract<Move['effect'], { kind: 'damage' }>;
 
-const artUrl = (id: number) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+const artUrl = (slug: string) => `assets/pokemon-art/${slug}.jpg`;
 
 const damageMove = (
   id: string,
@@ -205,7 +205,7 @@ export const creatures: Creature[] = [
     ability: 'せいでんき',
     abilityText: '接触した相手をまれに麻痺させる。',
     palette: { primary: '#f2cf3a', secondary: '#7b5b1c', accent: '#fff19a' },
-    art: { imageUrl: artUrl(25) },
+    art: { imageUrl: artUrl('pikachu') },
     moves: [
       damageMove('thunderbolt', '10まんボルト', 'Electric', 'special', 90, 100, 15, '強力な電撃。20%で麻痺。', 'lightning', { paralyzeChance: 20 }),
       damageMove('iron-tail', 'アイアンテール', 'Steel', 'physical', 100, 75, 15, '鋼の尾で攻撃。防御を下げることがある。', 'metal-tail', { statDrop: { def: -1 } }),
@@ -224,7 +224,7 @@ export const creatures: Creature[] = [
     ability: 'せいでんき',
     abilityText: '接触した相手をまひにすることがある。',
     palette: { primary: '#e88b38', secondary: '#6f4420', accent: '#ffd873' },
-    art: { imageUrl: artUrl(26) },
+    art: { imageUrl: artUrl('raichu') },
     moves: [
       damageMove('thunderbolt', '10まんボルト', 'Electric', 'special', 90, 100, 15, '強力な電撃。20%で麻痺。', 'lightning', { paralyzeChance: 20 }),
       damageMove('focus-blast', 'きあいだま', 'Fighting', 'special', 80, 85, 10, '気合の弾で苦手な相手を崩す。', 'aura'),
@@ -243,7 +243,7 @@ export const creatures: Creature[] = [
     ability: 'もうか',
     abilityText: 'HPが少ない時、ほのお技の威力が上がる。',
     palette: { primary: '#f07a38', secondary: '#2f68b8', accent: '#ffd06d' },
-    art: { imageUrl: artUrl(6) },
+    art: { imageUrl: artUrl('charizard') },
     moves: [
       damageMove('flamethrower', 'かえんほうしゃ', 'Fire', 'special', 90, 100, 15, '炎を吐いて攻撃。10%で火傷。', 'flame', { burnChance: 10 }),
       damageMove('air-slash', 'エアスラッシュ', 'Flying', 'special', 75, 95, 15, '空気の刃で切り裂く。', 'air-cut'),
@@ -262,7 +262,7 @@ export const creatures: Creature[] = [
     ability: 'げきりゅう',
     abilityText: 'HPが少ない時、みず技の威力が上がる。',
     palette: { primary: '#4f93e8', secondary: '#324d7a', accent: '#d5f0ff' },
-    art: { imageUrl: artUrl(9) },
+    art: { imageUrl: artUrl('blastoise') },
     moves: [
       damageMove('hydro-pump', 'ハイドロポンプ', 'Water', 'special', 110, 80, 5, '大きな水の砲撃を放つ。', 'water-cannon'),
       damageMove('aqua-jet', 'アクアジェット', 'Water', 'physical', 40, 100, 20, '水をまとって先制攻撃。', 'water-dash', {}, 1),
@@ -281,7 +281,7 @@ export const creatures: Creature[] = [
     ability: 'しんりょく',
     abilityText: 'HPが少ない時、くさ技の威力が上がる。',
     palette: { primary: '#65b95d', secondary: '#a66ad6', accent: '#f0a6c9' },
-    art: { imageUrl: artUrl(3) },
+    art: { imageUrl: artUrl('venusaur') },
     moves: [
       damageMove('energy-ball', 'エナジーボール', 'Grass', 'special', 90, 100, 10, '自然の力をぶつける。特防を下げることがある。', 'energy-ball', { statDrop: { spd: -1 } }),
       damageMove('sludge-bomb', 'ヘドロばくだん', 'Poison', 'special', 90, 100, 10, '毒の塊を投げる。', 'poison-burst'),
@@ -300,7 +300,7 @@ export const creatures: Creature[] = [
     ability: 'のろわれボディ',
     abilityText: '相手の技を妨害することがある。',
     palette: { primary: '#6f63a8', secondary: '#332b4c', accent: '#d6b1ff' },
-    art: { imageUrl: artUrl(94) },
+    art: { imageUrl: artUrl('gengar') },
     moves: [
       damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
       damageMove('sludge-wave', 'ヘドロウェーブ', 'Poison', 'special', 95, 100, 10, '毒の波で攻撃する。', 'poison-wave'),
@@ -319,7 +319,7 @@ export const creatures: Creature[] = [
     ability: 'せいしんりょく',
     abilityText: '集中力でひるみにくい。',
     palette: { primary: '#4f78c8', secondary: '#c95b43', accent: '#d9e5ff' },
-    art: { imageUrl: artUrl(448) },
+    art: { imageUrl: artUrl('lucario') },
     moves: [
       damageMove('aura-sphere', 'はどうだん', 'Fighting', 'special', 80, 100, 20, '必中級の波導弾を放つ。', 'aura'),
       damageMove('meteor-mash', 'コメットパンチ', 'Steel', 'physical', 90, 90, 10, '鋼の拳で攻撃。攻撃が上がることがある。', 'meteor-punch', { statDrop: { def: -1 } }),
@@ -338,7 +338,7 @@ export const creatures: Creature[] = [
     ability: 'てきおうりょく',
     abilityText: '同じタイプの技がさらに強くなる。',
     palette: { primary: '#b68b5c', secondary: '#6a4a2d', accent: '#fff1cf' },
-    art: { imageUrl: artUrl(133) },
+    art: { imageUrl: artUrl('eevee') },
     moves: [
       damageMove('swift', 'スピードスター', 'Normal', 'special', 60, 100, 20, '星型の光で安定して攻撃する。', 'stars'),
       damageMove('quick-attack', 'でんこうせっか', 'Normal', 'physical', 40, 100, 30, '素早く先制攻撃する。', 'quick-strike', {}, 1),
@@ -357,7 +357,7 @@ export const creatures: Creature[] = [
     ability: 'ちょすい',
     abilityText: '水の力を受け流し、粘り強く戦う。',
     palette: { primary: '#5aa7f0', secondary: '#315b88', accent: '#d3f3ff' },
-    art: { imageUrl: artUrl(134) },
+    art: { imageUrl: artUrl('vaporeon') },
     moves: [
       damageMove('surf', 'なみのり', 'Water', 'special', 90, 100, 15, '大きな波で安定して攻撃する。', 'water-cannon'),
       damageMove('aurora-beam', 'オーロラビーム', 'Ice', 'special', 65, 100, 20, '虹色の光線で攻撃。攻撃を下げることがある。', 'ice-beam', { statDrop: { atk: -1 } }),
@@ -376,7 +376,7 @@ export const creatures: Creature[] = [
     ability: 'ちくでん',
     abilityText: '電気を力に変えて素早く攻める。',
     palette: { primary: '#f4d83d', secondary: '#6e6725', accent: '#fff39f' },
-    art: { imageUrl: artUrl(135) },
+    art: { imageUrl: artUrl('jolteon') },
     moves: [
       damageMove('discharge', 'ほうでん', 'Electric', 'special', 80, 100, 15, '周囲に電撃を放つ。25%で麻痺。', 'lightning', { paralyzeChance: 25 }),
       damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
@@ -395,7 +395,7 @@ export const creatures: Creature[] = [
     ability: 'もらいび',
     abilityText: '炎を受けて反撃の力に変える。',
     palette: { primary: '#e65d36', secondary: '#7a3827', accent: '#ffd46f' },
-    art: { imageUrl: artUrl(136) },
+    art: { imageUrl: artUrl('flareon') },
     moves: [
       damageMove('fire-fang', 'ほのおのキバ', 'Fire', 'physical', 65, 95, 15, '炎の牙で攻撃。10%で火傷。', 'flame', { burnChance: 10 }),
       damageMove('facade', 'からげんき', 'Normal', 'physical', 70, 100, 20, '力強く体当たりする安定技。', 'body-slam'),
@@ -414,7 +414,7 @@ export const creatures: Creature[] = [
     ability: 'マジックミラー',
     abilityText: '相手の妨害を読み切って攻めに転じる。',
     palette: { primary: '#c892e8', secondary: '#684a86', accent: '#f7d7ff' },
-    art: { imageUrl: artUrl(196) },
+    art: { imageUrl: artUrl('espeon') },
     moves: [
       damageMove('psychic', 'サイコキネシス', 'Psychic', 'special', 90, 100, 10, '念力で攻撃。特防を下げることがある。', 'psystrike', { statDrop: { spd: -1 } }),
       damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
@@ -433,7 +433,7 @@ export const creatures: Creature[] = [
     ability: 'シンクロ',
     abilityText: '状態異常を恐れず、落ち着いて受け止める。',
     palette: { primary: '#3f3b4d', secondary: '#1d1c24', accent: '#f4cf45' },
-    art: { imageUrl: artUrl(197) },
+    art: { imageUrl: artUrl('umbreon') },
     moves: [
       damageMove('foul-play', 'イカサマ', 'Dark', 'physical', 80, 100, 15, '相手の力を利用する悪技。', 'dark-pulse'),
       damageMove('snarl', 'バークアウト', 'Dark', 'special', 55, 95, 15, '大きな声で攻撃。特攻を下げることがある。', 'bite', { statDrop: { spa: -1 } }),
@@ -452,7 +452,7 @@ export const creatures: Creature[] = [
     ability: 'リーフガード',
     abilityText: '葉の守りで崩されにくく戦う。',
     palette: { primary: '#70c25d', secondary: '#4f7a35', accent: '#e5ffc5' },
-    art: { imageUrl: artUrl(470) },
+    art: { imageUrl: artUrl('leafeon') },
     moves: [
       damageMove('leaf-blade', 'リーフブレード', 'Grass', 'physical', 90, 100, 15, '鋭い葉で切り裂く。', 'energy-ball'),
       damageMove('x-scissor', 'シザークロス', 'Fighting', 'physical', 80, 100, 15, '交差する斬撃で攻撃する。', 'quick-strike'),
@@ -471,7 +471,7 @@ export const creatures: Creature[] = [
     ability: 'ゆきがくれ',
     abilityText: '冷気に紛れて狙いを定める。',
     palette: { primary: '#8fd8f2', secondary: '#4b7e96', accent: '#eaffff' },
-    art: { imageUrl: artUrl(471) },
+    art: { imageUrl: artUrl('glaceon') },
     moves: [
       damageMove('ice-beam', 'れいとうビーム', 'Ice', 'special', 90, 100, 10, '冷気の光線で攻撃する。', 'ice-beam'),
       damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
@@ -490,7 +490,7 @@ export const creatures: Creature[] = [
     ability: 'フェアリースキン',
     abilityText: 'やさしいリボンで相手の攻撃を受け流す。',
     palette: { primary: '#f2a7d8', secondary: '#5f89c8', accent: '#fff2fb' },
-    art: { imageUrl: artUrl(700) },
+    art: { imageUrl: artUrl('sylveon') },
     moves: [
       damageMove('moonblast', 'ムーンフォース', 'Fairy', 'special', 90, 100, 15, '月の力で攻撃。特攻を下げることがある。', 'psystrike', { statDrop: { spa: -1 } }),
       damageMove('swift', 'スピードスター', 'Normal', 'special', 60, 100, 20, '星型の光で安定して攻撃する。', 'stars'),
@@ -509,7 +509,7 @@ export const creatures: Creature[] = [
     ability: 'あついしぼう',
     abilityText: 'ほのお・こおりの攻撃に強い。',
     palette: { primary: '#6d8ba8', secondary: '#2d3f4f', accent: '#f5e8ca' },
-    art: { imageUrl: artUrl(143) },
+    art: { imageUrl: artUrl('snorlax') },
     moves: [
       damageMove('body-slam', 'のしかかり', 'Normal', 'physical', 85, 100, 15, '重い体で攻撃。20%で麻痺。', 'body-slam', { paralyzeChance: 20 }),
       damageMove('heavy-slam', 'ヘビーボンバー', 'Steel', 'physical', 80, 100, 10, '重さを活かした鋼の攻撃。', 'heavy-slam'),
@@ -528,7 +528,7 @@ export const creatures: Creature[] = [
     ability: 'マルチスケイル',
     abilityText: 'HP満タンの時、受けるダメージを軽減する。',
     palette: { primary: '#e2a050', secondary: '#7c6df0', accent: '#f7e2a5' },
-    art: { imageUrl: artUrl(149) },
+    art: { imageUrl: artUrl('dragonite') },
     moves: [
       damageMove('outrage', 'げきりん', 'Dragon', 'physical', 100, 100, 10, '激しく暴れるドラゴン技。', 'dragon-rage'),
       damageMove('hurricane', 'ぼうふう', 'Flying', 'special', 110, 70, 10, '強烈な暴風で攻撃する。', 'hurricane'),
@@ -547,7 +547,7 @@ export const creatures: Creature[] = [
     ability: 'せいしんりょく',
     abilityText: '集中を切らさず、鋭い念力で攻める。',
     palette: { primary: '#d9b25f', secondary: '#6b4b24', accent: '#fff1bd' },
-    art: { imageUrl: artUrl(65) },
+    art: { imageUrl: artUrl('alakazam') },
     moves: [
       damageMove('psychic', 'サイコキネシス', 'Psychic', 'special', 90, 100, 10, '念力で攻撃。特防を下げることがある。', 'psystrike', { statDrop: { spd: -1 } }),
       damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),
@@ -566,7 +566,7 @@ export const creatures: Creature[] = [
     ability: 'こんじょう',
     abilityText: '不利な状況でも力強く攻め続ける。',
     palette: { primary: '#8fa0b8', secondary: '#c95b43', accent: '#f3d6a5' },
-    art: { imageUrl: artUrl(68) },
+    art: { imageUrl: artUrl('machamp') },
     moves: [
       damageMove('cross-chop', 'クロスチョップ', 'Fighting', 'physical', 90, 90, 10, '腕を交差させて強烈に攻撃する。', 'aura'),
       damageMove('rock-slide', 'いわなだれ', 'Ground', 'physical', 75, 90, 10, '岩を落として攻撃する。', 'heavy-slam'),
@@ -585,7 +585,7 @@ export const creatures: Creature[] = [
     ability: 'ちょすい',
     abilityText: '水の力を受け流し、長く戦い続ける。',
     palette: { primary: '#6ba8d8', secondary: '#405980', accent: '#d9f4ff' },
-    art: { imageUrl: artUrl(131) },
+    art: { imageUrl: artUrl('lapras') },
     moves: [
       damageMove('surf', 'なみのり', 'Water', 'special', 90, 100, 15, '大きな波で安定して攻撃する。', 'water-cannon'),
       damageMove('ice-beam', 'れいとうビーム', 'Ice', 'special', 90, 100, 10, '冷気の光線で攻撃する。', 'ice-beam'),
@@ -604,7 +604,7 @@ export const creatures: Creature[] = [
     ability: 'いかく',
     abilityText: '堂々とした姿で相手の攻めを鈍らせる。',
     palette: { primary: '#e46f32', secondary: '#3e2f29', accent: '#ffe1a0' },
-    art: { imageUrl: artUrl(59) },
+    art: { imageUrl: artUrl('arcanine') },
     moves: [
       damageMove('flamethrower', 'かえんほうしゃ', 'Fire', 'special', 90, 100, 15, '炎を吐いて攻撃。10%で火傷。', 'flame', { burnChance: 10 }),
       damageMove('crunch', 'かみくだく', 'Dark', 'physical', 80, 100, 15, '鋭くかみ砕く。防御を下げることがある。', 'bite', { statDrop: { def: -1 } }),
@@ -623,7 +623,7 @@ export const creatures: Creature[] = [
     ability: 'きょううん',
     abilityText: '勝負どころを見極めて急所を狙う。',
     palette: { primary: '#d9dce6', secondary: '#35425c', accent: '#e85d34' },
-    art: { imageUrl: artUrl(359) },
+    art: { imageUrl: artUrl('absol') },
     moves: [
       damageMove('night-slash', 'つじぎり', 'Dark', 'physical', 75, 100, 15, '鋭い刃で切り裂く悪技。', 'dark-pulse'),
       damageMove('psycho-cut', 'サイコカッター', 'Psychic', 'physical', 70, 100, 20, '念の刃で切り裂く。', 'psystrike'),
@@ -642,7 +642,7 @@ export const creatures: Creature[] = [
     ability: 'プレッシャー',
     abilityText: '相手に強い圧をかける。',
     palette: { primary: '#d7b6ff', secondary: '#6f63a8', accent: '#f06fa2' },
-    art: { imageUrl: artUrl(150) },
+    art: { imageUrl: artUrl('mewtwo') },
     moves: [
       damageMove('psystrike', 'サイコブレイク', 'Psychic', 'special', 100, 100, 10, '強烈な精神波で攻撃する。', 'psystrike'),
       damageMove('shadow-ball', 'シャドーボール', 'Ghost', 'special', 80, 100, 15, '影の球で攻撃。特防を下げることがある。', 'shadow-ball', { statDrop: { spd: -1 } }),

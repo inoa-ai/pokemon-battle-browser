@@ -142,6 +142,6 @@ Logic QA:
 ## Open Questions For Implementation
 
 - Which generation should the first playable version target? Default recommendation: Gen 9 custom battle via `@pkmn/sim`, unless the user wants a Gen I nostalgic scope.
-- Resolved 2026-07-04: the first local/private version should use official Pokemon characters and PokeAPI sprites official-artwork URLs. If distribution or commercial use becomes a goal, replace names/art with original-safe assets first.
+- Resolved 2026-07-04, updated 2026-07-06: the local/private version uses official Pokemon characters and locally bundled artwork so classroom browsers do not depend on external raw image hosts. If distribution or commercial use becomes a goal, replace names/art with original-safe assets first.
 - Should the visual style be classic handheld-inspired 2D, modern card-like, or minimal tactical UI?
 - Should CPU be casual/random first or strategically competent from the first build?

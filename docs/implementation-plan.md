@@ -112,7 +112,7 @@ Acceptance:
   - Alternative: Gen 1 if user wants simpler retro mechanics
 - Add local team definitions using Showdown team format or structured objects.
 - Add asset adapter:
-  - Current local/private prototype uses official Pokemon names and PokeAPI sprites official-artwork URLs.
+  - Current local/private prototype uses official Pokemon names and locally bundled Pokemon artwork files.
   - The asset layer should remain replaceable for any public/commercial build.
 
 Acceptance:
@@ -173,7 +173,7 @@ Completed first playable battle build:
 
 - App scaffolded with `Vite + TypeScript + React`.
 - 24 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options.
-- Official artwork is loaded from PokeAPI sprites `other/official-artwork` URLs.
+- Pokemon artwork is bundled under `public/assets/pokemon-art` so classroom browsers do not depend on external raw image hosts.
 - Battle engine implemented locally for MVP: 3v3 teams, move choice, switching, PP, type matchups, HP, statuses, boosts, fainting, CPU actions, win/loss.
 - Team loadouts now support selecting four moves per Pokemon from a candidate move pool.
 - Boss mode added as a 3v1 battle against a strengthened solo Mewtwo.
