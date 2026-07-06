@@ -176,7 +176,8 @@ Completed first playable battle build:
 - Pokemon artwork is bundled under `public/assets/pokemon-art` so classroom browsers do not depend on external raw image hosts.
 - Battle engine implemented locally for MVP: 3v3 teams, move choice, switching, PP, type matchups, HP, statuses, boosts, fainting, CPU actions, win/loss.
 - Team loadouts now support selecting four moves per Pokemon from a candidate move pool.
-- Boss mode added as a 3v1 battle against a strengthened solo Mewtwo.
+- Boss mode added as a strengthened solo Mewtwo battle and a 3v3 Mewtwo/Sylveon/Machamp boss team battle.
+- Boss team battles block the exact same three-creature composition on the player side.
 - Rich CSS/SVG-style action effects added: move flash, hit shake, type-colored bursts, particles, HP transitions, faint animation, status orbit, responsive layout.
 - Tests added in `src/game/battle.test.ts`.
 - Verification passed:

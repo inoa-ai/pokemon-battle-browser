@@ -117,6 +117,10 @@ export interface BattleFxEvent {
 export interface BattleState {
   phase: 'selecting' | 'player-turn' | 'animating' | 'finished';
   mode?: 'standard' | 'boss';
+  bossId?: string;
+  bossTitle?: string;
+  bossWinLabel?: string;
+  bossLoseLabel?: string;
   turn: number;
   playerTeam: ActiveCreature[];
   foeTeam: ActiveCreature[];
@@ -153,3 +157,13 @@ export interface TeamMemberSelection {
 }
 
 export type TeamSelectionInput = string | TeamMemberSelection;
+
+export interface CreateBattleOptions {
+  mode?: BattleState['mode'];
+  bossId?: string;
+  bossTitle?: string;
+  bossWinLabel?: string;
+  bossLoseLabel?: string;
+  bossHpMultiplier?: number;
+  bossHpScope?: 'first' | 'all';
+}

@@ -1,6 +1,6 @@
 import { creatures, getCreature, movePoolFor, normalizeMoveIds } from '../data/creatures';
 import { effectiveness, effectivenessTone } from './typeChart';
-import type { ActiveCreature, BattleChoice, BattleFxEvent, BattleLogEntry, BattleSide, BattleState, Creature, Move, Stats, StatusName, TeamSelectionInput } from './types';
+import type { ActiveCreature, BattleChoice, BattleFxEvent, BattleLogEntry, BattleSide, BattleState, CreateBattleOptions, Creature, Move, Stats, StatusName, TeamSelectionInput } from './types';
 
 let nextLogId = 1;
 let nextFxId = 1;
@@ -26,7 +26,7 @@ export function createActiveCreature(creature: Creature, side: BattleSide, slot:
   };
 }
 
-export function createBattle(playerIds: TeamSelectionInput[], foeIds: TeamSelectionInput[], options: { mode?: BattleState['mode'] } = {}): BattleState {
+export function createBattle(playerIds: TeamSelectionInput[], foeIds: TeamSelectionInput[], options: CreateBattleOptions = {}): BattleState {
   nextLogId = 1;
   nextFxId = 1;
   const playerTeam = playerIds.map((member, index) => {
@@ -35,13 +35,17 @@ export function createBattle(playerIds: TeamSelectionInput[], foeIds: TeamSelect
   });
   const foeTeam = foeIds.map((member, index) => {
     const selection = normalizeTeamMember(member);
-    const isBoss = options.mode === 'boss' && index === 0;
-    return createActiveCreature(getCreature(selection.creatureId), 'foe', index, selection.moveIds, { hpMultiplier: isBoss ? 3 : 1, isBoss });
+    const isBoss = options.mode === 'boss' && ((options.bossHpScope ?? 'first') === 'all' || index === 0);
+    return createActiveCreature(getCreature(selection.creatureId), 'foe', index, selection.moveIds, { hpMultiplier: isBoss ? options.bossHpMultiplier ?? 3 : 1, isBoss });
   });
 
   const state: BattleState = {
     phase: 'player-turn',
     mode: options.mode ?? 'standard',
+    bossId: options.bossId,
+    bossTitle: options.bossTitle,
+    bossWinLabel: options.bossWinLabel,
+    bossLoseLabel: options.bossLoseLabel,
     turn: 1,
     playerTeam,
     foeTeam,

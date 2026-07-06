@@ -55,7 +55,7 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
         <div>
           <span>ターン {battle.turn}</span>
           <h1>{playerCreature.name} 対 {foeCreature.name}</h1>
-          {battle.mode === 'boss' && <p className="battle-subtitle">ボス戦: ミュウツー撃破</p>}
+          {battle.mode === 'boss' && <p className="battle-subtitle">{battle.bossTitle ?? 'ボス戦'}</p>}
         </div>
         <div className="battle-header__actions">
           <button className="toolbar-button" onClick={onOpenRoster}>
@@ -144,7 +144,7 @@ export function BattleScreen({ battle, currentFx, busy, onBattleChange, onFxDone
 }
 
 function resultLabel(battle: BattleState): string {
-  if (battle.mode === 'boss') return battle.winner === 'player' ? 'ミュウツー撃破' : 'ボスに敗北';
+  if (battle.mode === 'boss') return battle.winner === 'player' ? battle.bossWinLabel ?? 'ボス撃破' : battle.bossLoseLabel ?? 'ボスに敗北';
   return battle.winner === 'player' ? 'アリーナ制覇' : 'チーム全滅';
 }
 

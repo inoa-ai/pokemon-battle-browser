@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { creatures, typeColors, typeLabels } from '../data/creatures';
+import { canChallengeBoss, getBossBattle } from './bosses';
 import { createBattle, getActiveMoves, performTurn, randomFoeTeam } from './battle';
 
 describe('battle engine', () => {
@@ -78,13 +79,52 @@ describe('battle engine', () => {
 
   it('creates a boss battle against a strengthened solo Mewtwo', () => {
     const normal = createBattle(['pikachu'], ['mewtwo']);
-    const boss = createBattle(['pikachu', 'charizard', 'venusaur'], [{ creatureId: 'mewtwo' }], { mode: 'boss' });
+    const mewtwo = getBossBattle('mewtwo-solo');
+    const boss = createBattle(['pikachu', 'charizard', 'venusaur'], mewtwo.team, {
+      mode: 'boss',
+      bossId: mewtwo.id,
+      bossTitle: mewtwo.title,
+      bossWinLabel: mewtwo.winLabel,
+      bossLoseLabel: mewtwo.loseLabel,
+      bossHpMultiplier: mewtwo.hpMultiplier,
+      bossHpScope: mewtwo.hpScope,
+    });
 
     expect(boss.mode).toBe('boss');
+    expect(boss.bossId).toBe('mewtwo-solo');
     expect(boss.foeTeam).toHaveLength(1);
     expect(boss.foeTeam[0].creatureId).toBe('mewtwo');
     expect(boss.foeTeam[0].isBoss).toBe(true);
     expect(boss.foeTeam[0].maxHp).toBeGreaterThan(normal.foeTeam[0].maxHp);
+  });
+
+  it('creates a three-creature boss team led by Mewtwo', () => {
+    const teamBoss = getBossBattle('mewtwo-team');
+    const normal = createBattle(['pikachu'], teamBoss.team);
+    const boss = createBattle(['pikachu', 'charizard', 'venusaur'], teamBoss.team, {
+      mode: 'boss',
+      bossId: teamBoss.id,
+      bossTitle: teamBoss.title,
+      bossWinLabel: teamBoss.winLabel,
+      bossLoseLabel: teamBoss.loseLabel,
+      bossHpMultiplier: teamBoss.hpMultiplier,
+      bossHpScope: teamBoss.hpScope,
+    });
+
+    expect(boss.mode).toBe('boss');
+    expect(boss.bossId).toBe('mewtwo-team');
+    expect(boss.foeTeam.map((member) => member.creatureId)).toEqual(['mewtwo', 'sylveon', 'machamp']);
+    expect(boss.foeTeam.every((member) => member.isBoss)).toBe(true);
+    expect(boss.foeTeam.every((member, index) => member.maxHp > normal.foeTeam[index].maxHp)).toBe(true);
+    expect(boss.bossTitle).toContain('ニンフィア');
+  });
+
+  it('blocks boss challenges that mirror the boss team composition', () => {
+    const teamBoss = getBossBattle('mewtwo-team');
+
+    expect(canChallengeBoss(['mewtwo', 'sylveon', 'machamp'], teamBoss)).toBe(false);
+    expect(canChallengeBoss(['machamp', 'mewtwo', 'sylveon'], teamBoss)).toBe(false);
+    expect(canChallengeBoss(['mewtwo', 'sylveon', 'pikachu'], teamBoss)).toBe(true);
   });
 
   it('prevents damage when the target is immune', () => {

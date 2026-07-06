@@ -204,6 +204,25 @@ button:disabled {
     rgba(255, 255, 255, 0.08);
 }
 
+.boss-button--mewtwo-team {
+  background:
+    linear-gradient(135deg, rgba(242, 207, 58, 0.16), rgba(119, 205, 153, 0.12)),
+    rgba(255, 255, 255, 0.08);
+}
+
+.hero-warning {
+  width: fit-content;
+  max-width: 100%;
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(242, 207, 58, 0.32);
+  background: rgba(242, 207, 58, 0.1);
+  color: #ffe98a;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
 .selection-pill {
   min-height: 34px;
   display: inline-flex;

@@ -6,6 +6,7 @@ import { BattleScreen } from './components/BattleScreen';
 import { CreatureCard } from './components/CreatureCard';
 import { creatures, defaultMoveIds, defaultPlayerTeam, getCreature, movePoolFor, typeColors, typeLabels } from './data/creatures';
 import { createBattle, randomFoeTeam, randomTeams } from './game/battle';
+import { bossBattles, canChallengeBoss, getBossBattle, type BossBattleDefinition, type BossBattleId } from './game/bosses';
 import type { BattleFxEvent, BattleState, Move, TeamMemberSelection } from './game/types';
 
 const MAX_TEAM_SIZE = 3;
@@ -26,6 +27,7 @@ export default function App() {
   const canStart = selected.length === MAX_TEAM_SIZE && selected.every((id) => selectedMoveIds(id, loadouts).length === 4);
   const currentFx = fxQueue[0];
   const selectedSet = useMemo(() => new Set(selected), [selected]);
+  const blockedBoss = useMemo(() => bossBattles.find((boss) => canStart && !canChallengeBoss(selected, boss)), [canStart, selected]);
 
   useEffect(() => {
     gameAudio.setEnabled(soundEnabled);
@@ -79,10 +81,23 @@ export default function App() {
     setView('battle');
   };
 
-  const startBossBattle = (playerTeam = selected, sourceLoadouts = loadouts) => {
+  const startBossBattle = (bossId: BossBattleId, playerTeam = selected, sourceLoadouts = loadouts) => {
     if (!canUseTeam(playerTeam, sourceLoadouts)) return;
+    const boss = getBossBattle(bossId);
+    if (!canChallengeBoss(playerTeam, boss)) {
+      setView('roster');
+      return;
+    }
     activateAudio('confirm');
-    const next = createBattle(toTeamSelection(playerTeam, sourceLoadouts), [{ creatureId: 'mewtwo' }], { mode: 'boss' });
+    const next = createBattle(toTeamSelection(playerTeam, sourceLoadouts), boss.team, {
+      mode: 'boss',
+      bossId: boss.id,
+      bossTitle: boss.title,
+      bossWinLabel: boss.winLabel,
+      bossLoseLabel: boss.loseLabel,
+      bossHpMultiplier: boss.hpMultiplier,
+      bossHpScope: boss.hpScope,
+    });
     playBattleTimeline(next);
     setView('battle');
   };
@@ -116,7 +131,7 @@ export default function App() {
   };
 
   const reset = () => {
-    if (battle?.mode === 'boss') startBossBattle(selected);
+    if (battle?.mode === 'boss') startBossBattle((battle.bossId as BossBattleId | undefined) ?? 'mewtwo-solo', selected);
     else startBattle(selected);
   };
 
@@ -172,11 +187,11 @@ export default function App() {
                   <Swords size={18} />
                   バトル開始
                 </button>
-                <button className="toolbar-button boss-button" disabled={!canStart} onClick={() => startBossBattle()}>
-                  <Trophy size={18} />
-                  ミュウツー撃破
-                </button>
+                {bossBattles.map((boss) => (
+                  <BossBattleButton key={boss.id} boss={boss} selected={selected} canStart={canStart} onStart={() => startBossBattle(boss.id)} />
+                ))}
               </div>
+              {blockedBoss && <p className="hero-warning">{blockedBoss.buttonLabel}は同じ3体構成では挑戦できません。</p>}
             </div>
           </div>
 
@@ -235,6 +250,21 @@ export default function App() {
         />
       )}
     </main>
+  );
+}
+
+function BossBattleButton({ boss, selected, canStart, onStart }: { boss: BossBattleDefinition; selected: string[]; canStart: boolean; onStart: () => void }) {
+  const blocked = canStart && !canChallengeBoss(selected, boss);
+  return (
+    <button
+      className={`toolbar-button boss-button boss-button--${boss.id}`}
+      disabled={!canStart || blocked}
+      onClick={onStart}
+      title={blocked ? '同じ3体構成では挑戦できません' : boss.title}
+    >
+      <Trophy size={18} />
+      {boss.buttonLabel}
+    </button>
   );
 }
 
