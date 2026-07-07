@@ -129,8 +129,8 @@ button:disabled {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   align-items: center;
   justify-items: center;
   padding: 24px 30px 18px min(430px, 32vw);
@@ -138,8 +138,8 @@ button:disabled {
 }
 
 .pokemon-hero-lineup img {
-  max-width: min(9vw, 122px);
-  max-height: 132px;
+  max-width: min(7vw, 92px);
+  max-height: 100px;
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -869,6 +869,7 @@ button:disabled {
 .fx-burst--ice { color: #82d8e8; }
 .fx-burst--fighting { color: #c95b43; }
 .fx-burst--poison { color: #a66ad6; }
+.fx-burst--rock { color: #b79a5b; }
 .fx-burst--ground { color: #c8a15d; }
 .fx-burst--flying { color: #8fb4ef; }
 .fx-burst--psychic { color: #f06fa2; }
@@ -1064,14 +1065,14 @@ button:disabled {
 
   .pokemon-hero-lineup {
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-rows: repeat(8, 1fr);
     padding: 28px;
     opacity: 0.55;
   }
 
   .pokemon-hero-lineup img {
-    max-width: 88px;
-    max-height: 96px;
+    max-width: 72px;
+    max-height: 78px;
   }
 
   .roster-hero__content {

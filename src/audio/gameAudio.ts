@@ -12,6 +12,7 @@ const typeFrequencies: Record<ElementType, number> = {
   Ice: 880,
   Fighting: 220,
   Poison: 277,
+  Rock: 147,
   Ground: 165,
   Flying: 587,
   Psychic: 659,

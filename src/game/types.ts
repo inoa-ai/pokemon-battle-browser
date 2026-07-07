@@ -7,6 +7,7 @@ export type ElementType =
   | 'Ice'
   | 'Fighting'
   | 'Poison'
+  | 'Rock'
   | 'Ground'
   | 'Flying'
   | 'Psychic'

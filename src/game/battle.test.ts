@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { creatures, typeColors, typeLabels } from '../data/creatures';
 import { canChallengeBoss, getBossBattle } from './bosses';
 import { createBattle, getActiveMoves, performTurn, randomFoeTeam, statStageMultiplier } from './battle';
+import { effectiveness } from './typeChart';
 
 describe('battle engine', () => {
   const withFixedRandom = <T>(value: number, run: () => T): T => {
@@ -41,14 +42,39 @@ describe('battle engine', () => {
     expect(foeTeam.every((id) => rosterIds.has(id))).toBe(true);
   });
 
-  it('includes new species and every current evolution option', () => {
+  it('includes expanded popular species and every current evolution option', () => {
     const rosterIds = new Set(creatures.map((creature) => creature.id));
     const newSpecies = ['alakazam', 'machamp', 'lapras', 'arcanine', 'absol'];
+    const popularSpecies = [
+      'greninja',
+      'mimikyu',
+      'garchomp',
+      'rayquaza',
+      'gardevoir',
+      'dragapult',
+      'tyranitar',
+      'bulbasaur',
+      'toxtricity',
+      'lugia',
+      'rowlet',
+      'aegislash',
+      'chandelure',
+      'luxray',
+      'decidueye',
+      'zoroark',
+      'lycanroc',
+      'corviknight',
+      'flygon',
+      'hydreigon',
+    ];
     const evolvedOptions = ['raichu', 'vaporeon', 'jolteon', 'flareon', 'espeon', 'umbreon', 'leafeon', 'glaceon', 'sylveon'];
 
-    expect(creatures).toHaveLength(24);
+    expect(creatures).toHaveLength(44);
     expect(newSpecies.every((id) => rosterIds.has(id))).toBe(true);
+    expect(popularSpecies.every((id) => rosterIds.has(id))).toBe(true);
     expect(evolvedOptions.every((id) => rosterIds.has(id))).toBe(true);
+    expect(typeColors.Rock).toBeTruthy();
+    expect(typeLabels.Rock).toBe('いわ');
     expect(typeColors.Fairy).toBeTruthy();
     expect(typeLabels.Fairy).toBe('フェアリー');
   });
@@ -177,6 +203,18 @@ describe('battle engine', () => {
 
     expect(next.foeTeam[0].hp).toBe(before);
     expect(next.log.some((entry) => entry.text.includes('効果がないようだ'))).toBe(true);
+  });
+
+  it('applies Rock defensive matchups for newly added Rock creatures', () => {
+    expect(effectiveness('Water', ['Rock'])).toBe(2);
+    expect(effectiveness('Grass', ['Rock'])).toBe(2);
+    expect(effectiveness('Fighting', ['Rock'])).toBe(2);
+    expect(effectiveness('Ground', ['Rock'])).toBe(2);
+    expect(effectiveness('Steel', ['Rock'])).toBe(2);
+    expect(effectiveness('Normal', ['Rock'])).toBe(0.5);
+    expect(effectiveness('Fire', ['Rock'])).toBe(0.5);
+    expect(effectiveness('Poison', ['Rock'])).toBe(0.5);
+    expect(effectiveness('Flying', ['Rock'])).toBe(0.5);
   });
 
   it('captures HP snapshots in sync with hit effects', () => {

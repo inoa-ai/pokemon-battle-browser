@@ -172,7 +172,7 @@ If this project ever moves toward public release, replace official names/art wit
 Completed first playable battle build:
 
 - App scaffolded with `Vite + TypeScript + React`.
-- 24 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options.
+- 44 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options and 20 popular additions from Pokemon of the Year 2020.
 - Pokemon artwork is bundled under `public/assets/pokemon-art` so classroom browsers do not depend on external raw image hosts.
 - Battle engine implemented locally for MVP: 3v3 teams, move choice, switching, PP, type matchups, HP, statuses, boosts, fainting, CPU actions, win/loss.
 - Team loadouts now support selecting four moves per Pokemon from a candidate move pool.
@@ -189,3 +189,16 @@ Completed first playable battle build:
   - Mobile viewport check with no horizontal overflow
 
 The earlier simulator recommendation remains useful for a future high-fidelity Pokemon-rules version. The current build uses a lightweight battle engine so the roster and polished effects can be playable immediately.
+
+## Implementation Status - 2026-07-07
+
+Completed popular roster expansion:
+
+- Added 20 popular Pokemon selected from official Pokemon of the Year 2020 results, raising the selectable roster from 24 to 44.
+- Added bundled local artwork for each new Pokemon under `public/assets/pokemon-art`.
+- Added Rock type support across data, labels, move pools, type matchups, audio feedback, and battle effects.
+- Added test coverage for the expanded roster and Rock defensive matchups.
+- Verification passed:
+  - `npm run test`
+  - `npm run build`
+  - Local browser smoke test at `http://127.0.0.1:4175/`
