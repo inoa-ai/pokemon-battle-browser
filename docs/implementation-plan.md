@@ -172,7 +172,7 @@ If this project ever moves toward public release, replace official names/art wit
 Completed first playable battle build:
 
 - App scaffolded with `Vite + TypeScript + React`.
-- 44 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options and 20 popular additions from Pokemon of the Year 2020.
+- 45 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options, Jirachi, and 20 popular additions from Pokemon of the Year 2020.
 - Pokemon artwork is bundled as transparent PNG under `public/assets/pokemon-art` so classroom browsers do not depend on external raw image hosts.
 - Battle engine implemented locally for MVP: 3v3 teams, move choice, switching, PP, type matchups, HP, statuses, boosts, fainting, CPU actions, win/loss.
 - Team loadouts now support selecting four moves per Pokemon from a candidate move pool.
@@ -207,7 +207,17 @@ Completed popular roster expansion:
 
 Completed transparent artwork pass:
 
-- Converted all 44 bundled Pokemon artwork files from white-background JPG to transparent PNG.
+- Converted the bundled Pokemon artwork files from white-background JPG to transparent PNG.
 - Updated creature art references to use `.png`.
 - Removed unused JPG files from `public/assets/pokemon-art` so the public build only carries the transparent assets.
 - Added test coverage that every creature art URL uses PNG.
+
+## Implementation Status - 2026-07-07 Jirachi And IVs
+
+Completed Jirachi and individual value support:
+
+- Added Jirachi as a Steel/Psychic selectable creature with local transparent PNG artwork.
+- Added optional `Creature.ivs` support for HP, Attack, Defense, Special Attack, Special Defense, and Speed.
+- Exported roster data now receives full 31 IVs by default for every creature, while per-creature IV overrides from 0 to 31 are reflected in battle stats.
+- Updated the level 50 battle stat formula so HP, damage stats, defenses, and Speed all use IVs.
+- Roster size is now 45.

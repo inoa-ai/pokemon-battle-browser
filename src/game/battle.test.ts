@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { creatures, typeColors, typeLabels } from '../data/creatures';
 import { canChallengeBoss, getBossBattle } from './bosses';
-import { createBattle, getActiveMoves, performTurn, randomFoeTeam, statStageMultiplier } from './battle';
+import { battleStatValue, createActiveCreature, createBattle, getActiveMoves, performTurn, randomFoeTeam, statIv, statStageMultiplier } from './battle';
 import { effectiveness } from './typeChart';
+import type { Stats } from './types';
 
 describe('battle engine', () => {
+  const statKeys: Array<keyof Stats> = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+
   const withFixedRandom = <T>(value: number, run: () => T): T => {
     const originalRandom = Math.random;
     Math.random = () => value;
@@ -69,15 +72,40 @@ describe('battle engine', () => {
     ];
     const evolvedOptions = ['raichu', 'vaporeon', 'jolteon', 'flareon', 'espeon', 'umbreon', 'leafeon', 'glaceon', 'sylveon'];
 
-    expect(creatures).toHaveLength(44);
+    expect(creatures).toHaveLength(45);
     expect(newSpecies.every((id) => rosterIds.has(id))).toBe(true);
     expect(popularSpecies.every((id) => rosterIds.has(id))).toBe(true);
+    expect(rosterIds.has('jirachi')).toBe(true);
     expect(evolvedOptions.every((id) => rosterIds.has(id))).toBe(true);
     expect(creatures.every((creature) => creature.art.imageUrl.endsWith('.png'))).toBe(true);
     expect(typeColors.Rock).toBeTruthy();
     expect(typeLabels.Rock).toBe('いわ');
     expect(typeColors.Fairy).toBeTruthy();
     expect(typeLabels.Fairy).toBe('フェアリー');
+  });
+
+  it('assigns and applies individual values for every creature', () => {
+    const jirachi = creatures.find((creature) => creature.id === 'jirachi');
+
+    expect(jirachi).toBeTruthy();
+    expect(creatures.every((creature) => statKeys.every((stat) => {
+      const iv = creature.ivs?.[stat];
+      return typeof iv === 'number' && iv >= 0 && iv <= 31;
+    }))).toBe(true);
+    expect(jirachi?.ivs).toEqual({ hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 });
+    expect(statIv(jirachi!, 'hp')).toBe(31);
+    expect(battleStatValue(jirachi!, 'hp')).toBe(175);
+    expect(battleStatValue(jirachi!, 'spe')).toBe(120);
+
+    const lowIvJirachi = { ...jirachi!, ivs: { ...jirachi!.ivs, hp: 0, spe: 0 } };
+    const active = createActiveCreature(lowIvJirachi, 'player', 0);
+
+    expect(statIv(lowIvJirachi, 'hp')).toBe(0);
+    expect(battleStatValue(lowIvJirachi, 'hp')).toBe(160);
+    expect(battleStatValue(lowIvJirachi, 'spe')).toBe(105);
+    expect(active.maxHp).toBe(160);
+    expect(statIv({ ...jirachi!, ivs: { hp: 99, atk: -3 } }, 'hp')).toBe(31);
+    expect(statIv({ ...jirachi!, ivs: { hp: 99, atk: -3 } }, 'atk')).toBe(0);
   });
 
   it('uses only the selected four moves for a custom loadout', () => {

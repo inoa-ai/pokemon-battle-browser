@@ -7,6 +7,9 @@ let nextFxId = 1;
 
 const statKeys: Array<keyof Stats> = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const BATTLE_LEVEL = 50;
+const DEFAULT_IV = 31;
+const MIN_IV = 0;
+const MAX_IV = 31;
 const CASUAL_DAMAGE_SCALE = 0.55;
 const MIN_BOOST_STAGE = -6;
 const MAX_BOOST_STAGE = 6;
@@ -28,7 +31,7 @@ interface BoostApplicationOptions {
 export function createActiveCreature(creature: Creature, side: BattleSide, slot: number, moveIds?: string[], options: { hpMultiplier?: number; isBoss?: boolean } = {}): ActiveCreature {
   const selectedMoveIds = normalizeMoveIds(creature, moveIds);
   const selectedMoves = movePoolFor(creature).filter((move) => selectedMoveIds.includes(move.id));
-  const maxHp = Math.round(battleHp(creature.stats.hp) * (options.hpMultiplier ?? 1));
+  const maxHp = Math.round(battleHp(creature) * (options.hpMultiplier ?? 1));
   return {
     uid: `${side}-${slot}-${creature.id}`,
     creatureId: creature.id,
@@ -483,8 +486,17 @@ function modifiedStat(state: BattleState, side: BattleSide, stat: keyof Stats, o
   const factor = statStageMultiplier(boost);
   const paralysis = stat === 'spe' && active.statuses.some((status) => status.name === 'paralyze') ? 0.65 : 1;
   const burn = stat === 'atk' && active.statuses.some((status) => status.name === 'burn') ? 0.75 : 1;
-  const baseStat = stat === 'hp' ? active.maxHp : battleStat(creature.stats[stat]);
+  const baseStat = stat === 'hp' ? active.maxHp : battleStatValue(creature, stat);
   return Math.round(baseStat * factor * paralysis * burn);
+}
+
+export function statIv(creature: Creature, stat: keyof Stats): number {
+  const rawIv = creature.ivs?.[stat] ?? DEFAULT_IV;
+  return Number.isFinite(rawIv) ? clamp(Math.round(rawIv), MIN_IV, MAX_IV) : DEFAULT_IV;
+}
+
+export function battleStatValue(creature: Creature, stat: keyof Stats): number {
+  return stat === 'hp' ? battleHp(creature) : battleStat(creature, stat);
 }
 
 export function statStageMultiplier(stage: number): number {
@@ -518,12 +530,12 @@ function statShortLabel(stat: keyof Stats): string {
   return labels[stat];
 }
 
-function battleHp(baseHp: number): number {
-  return Math.floor(((2 * baseHp + 31) * BATTLE_LEVEL) / 100) + BATTLE_LEVEL + 10;
+function battleHp(creature: Creature): number {
+  return Math.floor(((2 * creature.stats.hp + statIv(creature, 'hp')) * BATTLE_LEVEL) / 100) + BATTLE_LEVEL + 10;
 }
 
-function battleStat(baseStat: number): number {
-  return Math.floor(((2 * baseStat + 31) * BATTLE_LEVEL) / 100) + 5;
+function battleStat(creature: Creature, stat: keyof Stats): number {
+  return Math.floor(((2 * creature.stats[stat] + statIv(creature, stat)) * BATTLE_LEVEL) / 100) + 5;
 }
 
 function cloneState(state: BattleState): BattleState {

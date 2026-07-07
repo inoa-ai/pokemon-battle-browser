@@ -71,6 +71,7 @@ export interface Creature {
   role: string;
   visual: string;
   stats: Stats;
+  ivs?: Partial<Stats>;
   ability: string;
   abilityText: string;
   moves: Move[];

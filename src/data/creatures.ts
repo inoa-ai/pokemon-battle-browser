@@ -1,4 +1,4 @@
-import type { Creature, ElementType, Move } from '../game/types';
+import type { Creature, ElementType, Move, Stats } from '../game/types';
 
 export const typeColors: Record<ElementType, string> = {
   Normal: '#b8b4a8',
@@ -43,6 +43,8 @@ export const typeLabels: Record<ElementType, string> = {
 type DamageEffect = Extract<Move['effect'], { kind: 'damage' }>;
 
 const artUrl = (slug: string) => `assets/pokemon-art/${slug}.png`;
+
+const PERFECT_IVS: Stats = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
 
 const damageMove = (
   id: string,
@@ -199,7 +201,7 @@ export function normalizeMoveIds(creature: Creature, moveIds?: string[]): string
   return normalized;
 }
 
-export const creatures: Creature[] = [
+const creatureDefinitions: Creature[] = [
   {
     id: 'pikachu',
     name: 'ピカチュウ',
@@ -1018,6 +1020,26 @@ export const creatures: Creature[] = [
     ],
   },
   {
+    id: 'jirachi',
+    name: 'ジラーチ',
+    title: 'ねがいごとポケモン',
+    types: ['Steel', 'Psychic'],
+    role: '願いの万能サポート',
+    visual: '短い目覚めの間に願いをかなえ、はがねとエスパーの力で味方を支える幻のポケモン。',
+    stats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
+    ivs: PERFECT_IVS,
+    ability: 'てんのめぐみ',
+    abilityText: '追加効果を引き寄せる幸運で戦う。',
+    palette: { primary: '#f7e9a6', secondary: '#6db6e8', accent: '#f06fa2' },
+    art: { imageUrl: artUrl('jirachi') },
+    moves: [
+      damageMove('doom-desire', 'はめつのねがい', 'Steel', 'special', 120, 85, 5, '強い光で時間差のような一撃を放つ。', 'meteor-punch'),
+      damageMove('psychic', 'サイコキネシス', 'Psychic', 'special', 90, 100, 10, '念力で攻撃。特防を下げることがある。', 'psystrike', { statDrop: { spd: -1 }, statDropChance: 10 }),
+      statusMove('wish', 'ねがいごと', 'Normal', 10, '願いの力でHPを大きく回復する。', 'recover', { kind: 'heal', percent: 50 }),
+      statusMove('cosmic-power', 'コスモパワー', 'Psychic', 20, '防御と特防を上げる。', 'focus', { kind: 'boost', boosts: { def: 1, spd: 1 } }),
+    ],
+  },
+  {
     id: 'mewtwo',
     name: 'ミュウツー',
     title: 'いでんしポケモン',
@@ -1037,6 +1059,11 @@ export const creatures: Creature[] = [
     ],
   },
 ];
+
+export const creatures: Creature[] = creatureDefinitions.map((creature) => ({
+  ...creature,
+  ivs: { ...PERFECT_IVS, ...creature.ivs },
+}));
 
 export const defaultPlayerTeam = ['pikachu', 'charizard', 'venusaur'];
 export const defaultFoeTeam = ['blastoise', 'gengar', 'mewtwo'];
