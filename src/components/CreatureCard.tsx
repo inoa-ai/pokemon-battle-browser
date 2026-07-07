@@ -5,18 +5,25 @@ import type { CSSProperties } from 'react';
 interface CreatureCardProps {
   creature: Creature;
   selected?: boolean;
+  selectedIndex?: number;
+  target?: boolean;
   compact?: boolean;
   onClick?: () => void;
 }
 
-export function CreatureCard({ creature, selected = false, compact = false, onClick }: CreatureCardProps) {
+export function CreatureCard({ creature, selected = false, selectedIndex, target = false, compact = false, onClick }: CreatureCardProps) {
   return (
     <button
-      className={`creature-card ${selected ? 'is-selected' : ''} ${compact ? 'creature-card--compact' : ''}`}
+      className={`creature-card ${selected ? 'is-selected' : ''} ${target ? 'is-target' : ''} ${compact ? 'creature-card--compact' : ''}`}
       style={{ '--card-primary': creature.palette.primary, '--card-secondary': creature.palette.secondary } as CSSProperties}
       onClick={onClick}
       type="button"
     >
+      {selectedIndex !== undefined && (
+        <span className="creature-card__slot-badge">
+          {target ? '入替' : selectedIndex + 1}
+        </span>
+      )}
       <RosterPortrait creature={creature} />
       <div className="creature-card__body">
         <div className="creature-card__heading">

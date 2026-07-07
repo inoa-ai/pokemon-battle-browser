@@ -187,9 +187,9 @@ button:disabled {
 }
 
 .selection-strip {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  flex-wrap: wrap;
   margin: 14px 0;
 }
 
@@ -238,6 +238,88 @@ button:disabled {
 .selection-pill--empty {
   color: #7e8795;
   border-style: dashed;
+}
+
+.team-slot {
+  min-width: 0;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--slot-color) 34%, rgba(255, 255, 255, 0.16));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--slot-color) 14%, transparent), transparent 58%),
+    rgba(255, 255, 255, 0.07);
+}
+
+.team-slot.is-active {
+  border-color: color-mix(in srgb, var(--slot-color) 80%, white);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--slot-color) 62%, white), 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.team-slot__select {
+  min-width: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.team-slot__index {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #101216;
+  background: color-mix(in srgb, var(--slot-color) 76%, white);
+  font-weight: 950;
+}
+
+.team-slot__text {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.team-slot__text small {
+  color: #aeb8c8;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.team-slot__text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-slot__order {
+  display: grid;
+  grid-template-columns: repeat(2, 34px);
+  gap: 4px;
+}
+
+.slot-order-button {
+  width: 34px;
+  min-height: 100%;
+  border-radius: 6px;
+  padding: 0;
+  justify-content: center;
+}
+
+.slot-order-button:disabled {
+  opacity: 0.32;
 }
 
 .loadout-panel {
@@ -348,6 +430,7 @@ button:disabled {
 }
 
 .creature-card {
+  position: relative;
   appearance: none;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background:
@@ -371,6 +454,34 @@ button:disabled {
 
 .creature-card.is-selected {
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--card-primary) 70%, white), 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.creature-card.is-target {
+  border-color: #f8fbff;
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--card-primary) 78%, white), 0 22px 54px rgba(0, 0, 0, 0.3);
+}
+
+.creature-card__slot-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  min-width: 34px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: #101216;
+  background: color-mix(in srgb, var(--card-primary) 78%, white);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.creature-card.is-target .creature-card__slot-badge {
+  background: #f8fbff;
 }
 
 .creature-card__body {
@@ -1053,6 +1164,10 @@ button:disabled {
 
   .roster-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .selection-strip {
+    grid-template-columns: 1fr;
   }
 
   .loadout-grid {

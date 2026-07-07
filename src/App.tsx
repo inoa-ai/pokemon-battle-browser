@@ -1,4 +1,4 @@
-import { RotateCcw, Shuffle, Swords, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCcw, Shuffle, Swords, Trophy, Volume2, VolumeX } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { gameAudio } from './audio/gameAudio';
@@ -14,6 +14,7 @@ type Loadouts = Record<string, string[]>;
 
 export default function App() {
   const [selected, setSelected] = useState<string[]>(defaultPlayerTeam);
+  const [activeSlot, setActiveSlot] = useState(0);
   const [loadouts, setLoadouts] = useState<Loadouts>(() => defaultLoadouts(defaultPlayerTeam));
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [fxQueue, setFxQueue] = useState<BattleFxEvent[]>([]);
@@ -27,6 +28,7 @@ export default function App() {
   const canStart = selected.length === MAX_TEAM_SIZE && selected.every((id) => selectedMoveIds(id, loadouts).length === 4);
   const currentFx = fxQueue[0];
   const selectedSet = useMemo(() => new Set(selected), [selected]);
+  const selectedIndexMap = useMemo(() => new Map(selected.map((id, index) => [id, index])), [selected]);
   const blockedBoss = useMemo(() => bossBattles.find((boss) => canStart && !canChallengeBoss(selected, boss)), [canStart, selected]);
 
   useEffect(() => {
@@ -47,16 +49,44 @@ export default function App() {
     void gameAudio.unlock().then(() => gameAudio.playUi(sound));
   }, [soundEnabled]);
 
-  const toggleCreature = (id: string) => {
+  const chooseCreature = (id: string) => {
     activateAudio('tap');
     setBattle(null);
     setView('roster');
     setLoadouts((current) => ensureLoadout(current, id));
+    const existingIndex = selected.indexOf(id);
+    if (existingIndex >= 0) {
+      setActiveSlot(existingIndex);
+      return;
+    }
     setSelected((current) => {
-      if (current.includes(id)) return current.filter((entry) => entry !== id);
-      if (current.length >= MAX_TEAM_SIZE) return [...current.slice(1), id];
-      return [...current, id];
+      const slot = Math.min(activeSlot, MAX_TEAM_SIZE - 1);
+      if (current.length >= MAX_TEAM_SIZE) {
+        const next = [...current];
+        next[slot] = id;
+        return next;
+      }
+      const next = [...current];
+      next.splice(Math.min(slot, next.length), 0, id);
+      return next.slice(0, MAX_TEAM_SIZE);
     });
+  };
+
+  const selectSlot = (index: number) => {
+    activateAudio('tap');
+    setActiveSlot(index);
+  };
+
+  const moveTeamSlot = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= selected.length) return;
+    activateAudio('tap');
+    setSelected((current) => {
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+    setActiveSlot(target);
   };
 
   const chooseMove = (creatureId: string, moveId: string) => {
@@ -126,6 +156,7 @@ export default function App() {
     const teams = randomTeams();
     const nextLoadouts = defaultLoadouts(teams.player);
     setSelected(teams.player);
+    setActiveSlot(0);
     setLoadouts((current) => ({ ...current, ...nextLoadouts }));
     startBattle(teams.player, teams.foe, { ...loadouts, ...nextLoadouts });
   };
@@ -196,19 +227,33 @@ export default function App() {
           </div>
 
           <div className="selection-strip">
-            {selected.map((id, index) => {
-              const creature = creatures.find((entry) => entry.id === id)!;
+            {Array.from({ length: MAX_TEAM_SIZE }).map((_, index) => {
+              const id = selected[index];
+              const creature = id ? getCreature(id) : null;
               return (
-                <span key={id} className="selection-pill">
-                  {index + 1}. {creature.name}
-                </span>
+                <article
+                  key={index}
+                  className={`team-slot ${activeSlot === index ? 'is-active' : ''} ${creature ? '' : 'is-empty'}`}
+                  style={{ '--slot-color': creature?.palette.primary ?? '#aeb8c8' } as CSSProperties}
+                >
+                  <button className="team-slot__select" onClick={() => selectSlot(index)} type="button">
+                    <span className="team-slot__index">{index + 1}</span>
+                    <span className="team-slot__text">
+                      <small>{activeSlot === index ? '入れ替え先' : 'スロット'}</small>
+                      <strong>{creature?.name ?? '未選択'}</strong>
+                    </span>
+                  </button>
+                  <div className="team-slot__order" aria-label={`${index + 1}番目の順番変更`}>
+                    <button className="slot-order-button" disabled={index === 0 || !creature} onClick={() => moveTeamSlot(index, -1)} title="左へ" type="button">
+                      <ArrowLeft size={14} />
+                    </button>
+                    <button className="slot-order-button" disabled={index >= selected.length - 1 || !creature} onClick={() => moveTeamSlot(index, 1)} title="右へ" type="button">
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </article>
               );
             })}
-            {Array.from({ length: MAX_TEAM_SIZE - selected.length }).map((_, index) => (
-              <span key={`empty-${index}`} className="selection-pill selection-pill--empty">
-                未選択
-              </span>
-            ))}
           </div>
 
           <section className="loadout-panel">
@@ -229,7 +274,9 @@ export default function App() {
                 key={creature.id}
                 creature={creature}
                 selected={selectedSet.has(creature.id)}
-                onClick={() => toggleCreature(creature.id)}
+                selectedIndex={selectedIndexMap.get(creature.id)}
+                target={selectedIndexMap.get(creature.id) === activeSlot}
+                onClick={() => chooseCreature(creature.id)}
               />
             ))}
           </div>
