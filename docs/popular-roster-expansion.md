@@ -38,6 +38,6 @@ The existing roster already included several top-ranked Pokemon such as Pikachu,
 ## Implementation Notes
 
 - Roster size increased from 24 to 44.
-- New local artwork files were added under `public/assets/pokemon-art`.
+- New local artwork files were added under `public/assets/pokemon-art` and later converted to transparent PNG.
 - Rock type support was added for Tyranitar and Lycanroc.
 - Each added Pokemon has four default moves and also participates in the move loadout candidate pool.

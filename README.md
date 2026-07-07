@@ -6,7 +6,7 @@
 
 ## Features
 
-- 44体の公式ポケモンと公式アート表示
+- 44体の公式ポケモンと透過PNGアート表示
 - ピカチュウとイーブイの進化後を選択可能
 - 3体チーム選択
 - 編成画面で各ポケモンの技を候補から4つ選択
@@ -47,7 +47,7 @@ https://inoa-ai.github.io/pokemon-battle-browser/
 
 ## Project Structure
 
-- `src/data/creatures.ts`: 44体のポケモン、ステータス、技候補、タイプ、ローカル同梱アート
+- `src/data/creatures.ts`: 44体のポケモン、ステータス、技候補、タイプ、ローカル同梱の透過PNGアート
 - `src/game/battle.ts`: 戦闘エンジン、技ロードアウト、ボス戦モード
 - `src/game/typeChart.ts`: タイプ相性
 - `src/components/BattleScreen.tsx`: 戦闘UI

@@ -42,7 +42,7 @@ export const typeLabels: Record<ElementType, string> = {
 
 type DamageEffect = Extract<Move['effect'], { kind: 'damage' }>;
 
-const artUrl = (slug: string) => `assets/pokemon-art/${slug}.jpg`;
+const artUrl = (slug: string) => `assets/pokemon-art/${slug}.png`;
 
 const damageMove = (
   id: string,

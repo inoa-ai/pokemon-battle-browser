@@ -173,7 +173,7 @@ Completed first playable battle build:
 
 - App scaffolded with `Vite + TypeScript + React`.
 - 44 official Pokemon roster implemented for local/private prototype use, including Pikachu/Eevee evolution options and 20 popular additions from Pokemon of the Year 2020.
-- Pokemon artwork is bundled under `public/assets/pokemon-art` so classroom browsers do not depend on external raw image hosts.
+- Pokemon artwork is bundled as transparent PNG under `public/assets/pokemon-art` so classroom browsers do not depend on external raw image hosts.
 - Battle engine implemented locally for MVP: 3v3 teams, move choice, switching, PP, type matchups, HP, statuses, boosts, fainting, CPU actions, win/loss.
 - Team loadouts now support selecting four moves per Pokemon from a candidate move pool.
 - Boss mode added as a strengthened solo Mewtwo battle and a 3v3 Mewtwo/Sylveon/Machamp boss team battle.
@@ -202,3 +202,12 @@ Completed popular roster expansion:
   - `npm run test`
   - `npm run build`
   - Local browser smoke test at `http://127.0.0.1:4175/`
+
+## Implementation Status - 2026-07-07 Transparent Artwork
+
+Completed transparent artwork pass:
+
+- Converted all 44 bundled Pokemon artwork files from white-background JPG to transparent PNG.
+- Updated creature art references to use `.png`.
+- Removed unused JPG files from `public/assets/pokemon-art` so the public build only carries the transparent assets.
+- Added test coverage that every creature art URL uses PNG.

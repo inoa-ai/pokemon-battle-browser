@@ -73,6 +73,7 @@ describe('battle engine', () => {
     expect(newSpecies.every((id) => rosterIds.has(id))).toBe(true);
     expect(popularSpecies.every((id) => rosterIds.has(id))).toBe(true);
     expect(evolvedOptions.every((id) => rosterIds.has(id))).toBe(true);
+    expect(creatures.every((creature) => creature.art.imageUrl.endsWith('.png'))).toBe(true);
     expect(typeColors.Rock).toBeTruthy();
     expect(typeLabels.Rock).toBe('いわ');
     expect(typeColors.Fairy).toBeTruthy();
